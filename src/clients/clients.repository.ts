@@ -1,8 +1,8 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClientEntity } from './client.entity';
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable,  NotFoundException } from '@nestjs/common';
 import { Repository, UpdateResult, DeleteResult } from 'typeorm';
-import { Observable, from, asyncScheduler, of, EMPTY } from 'rxjs';
+import { Observable, from,  of, EMPTY } from 'rxjs';
 import { throwIfEmpty, flatMap } from "rxjs/operators";
 import { Client } from './client.interface';
 import { ClientDto } from './dtos';
@@ -33,7 +33,6 @@ export class ClientsRepository {
   }
 
   update(id: number, clientProspect: ClientDto): Observable<UpdateResult> {
-    // return from(this._repository.update(id, clientProspect));
      return this.get(id).pipe(
       flatMap(() => {
         return from(this._repository.update(id, clientProspect))

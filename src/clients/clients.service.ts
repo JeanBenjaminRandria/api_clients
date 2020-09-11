@@ -4,7 +4,6 @@ import { Observable, of, EMPTY } from 'rxjs';
 import { Client } from './client.interface';
 import { ClientDto } from './dtos';
 import { UpdateResult, DeleteResult } from 'typeorm';
-import { flatMap, throwIfEmpty } from 'rxjs/operators';
 
 @Injectable()
 export class ClientsService {
@@ -20,10 +19,6 @@ export class ClientsService {
 
   get(id: number): Observable<Client>{
     return this._repository.get(id)
-    // .pipe(
-    //   flatMap((p) => (p ? of(p) : EMPTY)),
-    //   throwIfEmpty(() => new NotFoundException(`Client does not exist`)),
-    // );
   }
 
   update(id: number, clientProspect: ClientDto): Observable<UpdateResult>{
