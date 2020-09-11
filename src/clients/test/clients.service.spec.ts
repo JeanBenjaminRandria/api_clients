@@ -6,6 +6,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { ClientEntity } from '../client.entity';
 import { from, of } from 'rxjs';
 import { NotFoundException } from '@nestjs/common';
+import { plainToClass } from 'class-transformer';
+import { ClientReadDto } from '../dtos/client-read.dto';
 
 describe('ClientsService', () => {
   let service: ClientsService;
@@ -55,7 +57,7 @@ describe('ClientsService', () => {
       }
       const pipeSpy = jest.spyOn(pipeMock, 'pipe');
       service.create(clientDto).subscribe((res) => {
-        expect(res).toEqual(clientDtoSaved);
+        expect(res).toEqual(plainToClass(ClientReadDto, clientDtoSaved));
       })
       expect(createSpy).toBeCalledWith({ ...clientDto });
       expect(createSpy).toBeCalledTimes(1);
@@ -70,7 +72,7 @@ describe('ClientsService', () => {
       }
       const pipeSpy = jest.spyOn(pipeMock, 'pipe');
       service.getAll().subscribe((res) => {
-        expect(res).toEqual([clientDtoSaved]);
+        expect(res).toEqual([plainToClass(ClientReadDto, clientDtoSaved)]);
       })
       expect(getAllSpy).toBeCalledWith();
       expect(getAllSpy).toBeCalledTimes(1);
@@ -85,7 +87,7 @@ describe('ClientsService', () => {
       }
       const pipeSpy = jest.spyOn(pipeMock, 'pipe');
       service.get(clientDtoSaved.id).subscribe((res) => {
-        expect(res).toEqual(clientDtoSaved);
+        expect(res).toEqual(plainToClass(ClientReadDto, clientDtoSaved));
       })
       expect(getSpy).toBeCalledWith(clientDtoSaved.id);
       expect(getSpy).toBeCalledTimes(1);
