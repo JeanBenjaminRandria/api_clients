@@ -7,10 +7,10 @@ async function bootstrap() {
 
   //Set App
   app.setGlobalPrefix('api');
-  
+
   const configService = app.get(ConfigService);
   const port = configService.get('app.port');
-  
+
   const listener = await app.listen(port, () =>
     console.log(`Server run port ${listener.address().port}`),
   );
