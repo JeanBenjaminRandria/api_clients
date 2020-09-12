@@ -15,18 +15,12 @@ export class ClientsRepository {
   ) {}
 
   getAll(): Observable<Client[]> {
-    return from(this._repository.find());
+    return from(this._repository.find({ relations: ['referrer'] }));
   }
 
   get(id: number): Observable<Client> {
     return (
-      from(this._repository.findOne({ where: { id }/*, relations: ['referrer']*/ }))
-        // return from(
-        //   this._repository.createQueryBuilder('clients')
-        //   .where('clients.id = :id', {id})
-        //   .leftJoinAndSelect('clients.referrer', 'clients')
-        //   .getOne()
-        // )
+      from(this._repository.findOne({ where: { id }, relations: ['referrer'] }))
         .pipe(
           flatMap(p => (p ? of(p) : EMPTY)),
           throwIfEmpty(() => new NotFoundException(`Client was not found`)),
