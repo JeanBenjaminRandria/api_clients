@@ -2,18 +2,15 @@ import { IsString, Matches, MaxLength, IsNumber, } from "class-validator";
 import { Expose, Exclude } from "class-transformer";
 
 @Exclude()
-export class ClientDto {
+export class ClientMinDto {
+
+  @Expose()
+  @IsNumber()
+  id: number;
+
   @Expose()
   @IsString()
   @MaxLength(100)
   name: string;
 
-  @Expose()
-  @MaxLength(15)
-  @Matches(/^[JGVEP][-][0-9]{9}[-][0-9]{1}$/)
-  rif: string;
-
-  @Expose()
-  @IsNumber()
-  referrerId?: number;
 }

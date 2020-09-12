@@ -6,6 +6,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { ClientEntity } from '../client.entity';
 import { of } from 'rxjs';
 import { ClientsController } from '../clients.controller';
+import { plainToClass } from 'class-transformer';
+import { ClientReadDto } from '../dtos/client-read.dto';
 
 describe('ClientsController', () => {
   let service: ClientsService;
@@ -60,13 +62,13 @@ describe('ClientsController', () => {
 
   describe('Create one Client', () => {
     it('save ', async () => {
-      const createSpy = jest.spyOn(service, 'create').mockReturnValue(of(clientDtoSaved))
+      const createSpy = jest.spyOn(service, 'create').mockReturnValue(of(plainToClass(ClientReadDto, clientDtoSaved)))
       const pipeMock = {
         pipe: jest.fn()
       }
       const pipeSpy = jest.spyOn(pipeMock, 'pipe');
       controller.postCreate(clientDto).subscribe((res) => {
-        expect(res).toEqual(clientDtoSaved);
+        expect(res).toEqual(plainToClass(ClientReadDto, clientDtoSaved));
       })
       expect(createSpy).toBeCalledWith({ ...clientDto });
       expect(createSpy).toBeCalledTimes(1);
@@ -75,13 +77,13 @@ describe('ClientsController', () => {
 
   describe('find all Clients', () => {
     it('getAll ', async () => {
-      const getAllSpy = jest.spyOn(service, 'getAll').mockReturnValue(of([clientDtoSaved]))
+      const getAllSpy = jest.spyOn(service, 'getAll').mockReturnValue(of([plainToClass(ClientReadDto, clientDtoSaved)]))
       const pipeMock = {
         pipe: jest.fn()
       }
       const pipeSpy = jest.spyOn(pipeMock, 'pipe');
       controller.getAllClients().subscribe((res) => {
-        expect(res).toEqual([clientDtoSaved]);
+        expect(res).toEqual([plainToClass(ClientReadDto, clientDtoSaved)]);
       })
       expect(getAllSpy).toBeCalledWith();
       expect(getAllSpy).toBeCalledTimes(1);
@@ -90,13 +92,13 @@ describe('ClientsController', () => {
 
   describe('find one Client', () => {
     it('get one client exist ', async () => {
-      const getSpy = jest.spyOn(service, 'get').mockReturnValue(of(clientDtoSaved))
+      const getSpy = jest.spyOn(service, 'get').mockReturnValue(of(plainToClass(ClientReadDto, clientDtoSaved)))
       const pipeMock = {
         pipe: jest.fn()
       }
       const pipeSpy = jest.spyOn(pipeMock, 'pipe');
       controller.get(clientDtoSaved.id).subscribe((res) => {
-        expect(res).toEqual(clientDtoSaved);
+        expect(res).toEqual(plainToClass(ClientReadDto, clientDtoSaved));
       })
       expect(getSpy).toBeCalledWith(clientDtoSaved.id);
       expect(getSpy).toBeCalledTimes(1);
