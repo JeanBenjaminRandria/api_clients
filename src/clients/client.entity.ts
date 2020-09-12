@@ -3,24 +3,27 @@ import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 
 @Entity('clients')
 export class ClientEntity extends BaseEntity {
-
   @Column('varchar', { length: 100, nullable: false })
   name: string;
 
-  
-  @Column('varchar', { unique: true, length: 15, nullable: false })
+  @Column('varchar', { unique: true, length: 13, nullable: false })
   rif: string;
 
-  /* istanbul ignore next */
-  @OneToMany(type => ClientEntity, client => client.referrer)
+  @OneToMany(
+    type => ClientEntity,
+    client => client.referrer,
+    { nullable: true },
+  )
   referrers?: ClientEntity[];
 
-  @Column()
-  referrerId: number;
+  @Column({ nullable: true })
+  referrerId?: number;
 
-  /* istanbul ignore next */
-  @ManyToOne( type => ClientEntity, client => client.referrers, {eager: true})
-  @JoinColumn({name: 'referrerId'})
+  @ManyToOne(
+    type => ClientEntity,
+    client => client.referrers,
+    { nullable: true },
+  )
+  @JoinColumn({ name: 'referrerId' })
   referrer?: ClientEntity;
-
 }

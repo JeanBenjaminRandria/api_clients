@@ -3,61 +3,66 @@ import { ClientEntity } from './client.entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository, UpdateResult, DeleteResult } from 'typeorm';
 import { Observable, from, of, EMPTY } from 'rxjs';
-import { throwIfEmpty, flatMap } from "rxjs/operators";
+import { throwIfEmpty, flatMap } from 'rxjs/operators';
 import { Client } from './client.interface';
-import { ClientDto } from './dtos';
+import { ClientDto, ClientUpdateDto } from './dtos';
 
 @Injectable()
 export class ClientsRepository {
   constructor(
     @InjectRepository(ClientEntity)
     private readonly _repository: Repository<ClientEntity>,
-  ) { }
+  ) {}
 
   getAll(): Observable<Client[]> {
-    return from(this._repository.find())
-
+    return from(this._repository.find());
   }
 
   get(id: number): Observable<Client> {
-    return from(this._repository.findOne(id)).pipe(
-      flatMap(
-        (p) => (p ? of(p) : EMPTY)),
-      throwIfEmpty(() => new NotFoundException(`Client was not found`)),
-    )
+    return (
+      from(this._repository.findOne({ where: { id }/*, relations: ['referrer']*/ }))
+        // return from(
+        //   this._repository.createQueryBuilder('clients')
+        //   .where('clients.id = :id', {id})
+        //   .leftJoinAndSelect('clients.referrer', 'clients')
+        //   .getOne()
+        // )
+        .pipe(
+          flatMap(p => (p ? of(p) : EMPTY)),
+          throwIfEmpty(() => new NotFoundException(`Client was not found`)),
+        )
+    );
   }
 
   create(clientProspect: ClientDto): Observable<Client> {
     if (clientProspect.referrerId) {
-      // const referrer = this._repository.findOne({ id: clientProspect.referrerId });
-      // if (!referrer) throw new NotFoundException(`Referrer was not found`)
       return this.get(clientProspect.referrerId).pipe(
         flatMap(() => {
-          return this.saveClient(clientProspect)
-        })
-      )
+          return this.saveClient(clientProspect);
+        }),
+      );
     } else {
-      return this.saveClient(clientProspect)
+      return this.saveClient(clientProspect);
     }
-
   }
 
   private saveClient(clientProspect: ClientDto): Observable<Client> {
     const client = this._repository.create(clientProspect);
-    return from(this._repository.save(client))
+    return from(this._repository.save(client));
   }
 
-  update(id: number, clientProspect: ClientDto): Observable<UpdateResult> {
+  update(
+    id: number,
+    clientProspect: ClientUpdateDto,
+  ): Observable<UpdateResult> {
     return this.get(id).pipe(
       flatMap(() => {
-        return from(this._repository.update(id, clientProspect))
-      })
-    )
+        return from(this._repository.update(id, clientProspect));
+      }),
+    );
   }
 
   delete(id: number): Observable<DeleteResult> {
     return from(this._repository.delete(id));
   }
-
-
 }

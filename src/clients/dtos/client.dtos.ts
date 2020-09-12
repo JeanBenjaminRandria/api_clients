@@ -1,19 +1,10 @@
-import { IsString, Matches, MaxLength, IsNumber, } from "class-validator";
-import { Expose, Exclude } from "class-transformer";
+import { Exclude } from 'class-transformer';
+import { IntersectionType } from '@nestjs/swagger';
+import { ClientMicroDto } from './client-micro.dto';
+import { ReferrerIdDto } from './referrer-id.dto';
 
 @Exclude()
-export class ClientDto {
-  @Expose()
-  @IsString()
-  @MaxLength(100)
-  name: string;
-
-  @Expose()
-  @MaxLength(15)
-  @Matches(/^[JGVEP][-][0-9]{9}[-][0-9]{1}$/)
-  rif: string;
-
-  @Expose()
-  @IsNumber()
-  referrerId?: number;
-}
+export class ClientDto extends IntersectionType(
+  ClientMicroDto,
+  ReferrerIdDto,
+) {}
