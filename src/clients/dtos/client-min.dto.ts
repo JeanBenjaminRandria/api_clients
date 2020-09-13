@@ -18,6 +18,7 @@ export class ClientMinDto {
   @ApiProperty()
   @Expose()
   @MaxLength(13)
+  @IsString()
   @Matches(/^[JGVEP][-][0-9]{9}[-][0-9]{1}$/)
   rif: string;
 }

@@ -6,12 +6,12 @@ export const referrer: Client = {
   createdAt: new Date(),
   updatedAt: new Date(),
   name: 'client referrer',
-  rif: 'J-3041933-7',
+  rif: 'J-30997933-9',
 };
 
 export const clientDto: ClientDto = {
   name: 'client test',
-  rif: 'J-3041933-7',
+  rif: 'J-30997934-0',
   referrerId: referrer.id,
 };
 

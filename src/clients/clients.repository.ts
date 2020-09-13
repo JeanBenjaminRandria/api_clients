@@ -3,10 +3,10 @@ import { ClientEntity } from './client.entity';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Repository, UpdateResult, DeleteResult } from 'typeorm';
 import { Observable, from, of, throwError, merge } from 'rxjs';
-import { flatMap, map, mergeMap, filter, isEmpty } from 'rxjs/operators';
+import { map, mergeMap, filter, isEmpty } from 'rxjs/operators';
 import { Client } from './client.interface';
 import { ClientDto, ClientUpdateDto } from './dtos';
-import { clientDto } from './test/data-test';
+import { pid } from 'process';
 
 @Injectable()
 export class ClientsRepository {
@@ -35,40 +35,45 @@ export class ClientsRepository {
       .pipe(map(cli => cli.referrerId))
       .pipe(filter(id => id !== undefined))
       .pipe(mergeMap(id => this.validateDontExistIdDb(id)))
+      .pipe(filter(isEmpty => isEmpty === false))
       .pipe(mergeMap(()=> throwError(new BadRequestException('Referrer does not exist'))));
   }
 
-  validateDontExistIdDb( id: number):Observable<ClientEntity>{
+  validateDontExistIdDb( id: number):Observable<boolean>{
     return of(id)
       .pipe( mergeMap(id => this._repository.findOne(id)))
-      .pipe(filter(cli => cli === null))
+      .pipe(filter(cli => cli === undefined))
+      .pipe(isEmpty())
   }
 
-  validateDontExistRifDb( id: string):Observable<ClientEntity>{
-    return of(id)
-      .pipe( mergeMap(id => this._repository.findOne(id)))
-      .pipe(filter(cli => cli !== null))
+  validateDontExistRifDb( rif: string):Observable<boolean>{    
+    return of(rif)
+      .pipe( mergeMap(rif => this._repository.findOne({rif})))
+      .pipe(filter(cli => cli !== undefined))
+      .pipe(isEmpty())
   }
 
   validateRif(client: ClientDto): Observable<any>{
-    return of(clientDto.rif)
+    return of(client.rif)
       .pipe(mergeMap(rif => this.validateDontExistRifDb(rif)))
+      .pipe(filter(isEmpty => isEmpty === false))
       .pipe(mergeMap(()=> throwError(new BadRequestException('Client already exist'))));
   }
 
 
   create(clientProspect: ClientDto): Observable<any> {
+    
     return merge(
         this.ValidateReferrerId(clientProspect), 
         this.validateRif(clientProspect)
       )
       .pipe(isEmpty())
       .pipe(filter(val => val === true))
-      .pipe(mergeMap(() => this.saveClient(clientProspect)))
+      .pipe(mergeMap(() => this.saveClient(clientProspect)))       
   }
 
   private saveClient(clientProspect: ClientDto): Observable<Client> {
-    const client = this._repository.create(clientProspect);
+    const client = this._repository.create(clientProspect);  
     return from(this._repository.save(client))
       .pipe(mergeMap(cli => this.get(cli.id)))
   }
@@ -77,6 +82,7 @@ export class ClientsRepository {
     id: number,
     clientProspect: ClientUpdateDto,
   ): Observable<UpdateResult> {
+    
     return this.get(id)
     .pipe(mergeMap(() => this._repository.update(id, clientProspect)))
   }

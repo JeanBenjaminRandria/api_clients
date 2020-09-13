@@ -65,7 +65,7 @@ describe('UserService', () => {
     it('save client without referrer ', async () => {
       const clientWithoutDto: ClientDto = {
         name: 'client test',
-        rif: 'J-3041933-7',
+        rif: 'J-30997933-1',
       };
       const validateRif = jest.spyOn(clientsRepository, 'validateDontExistRifDb').mockReturnValueOnce(EMPTY);
       const validateReferrerId = jest.spyOn(clientsRepository, 'validateDontExistIdDb').mockReturnValueOnce(EMPTY);
@@ -75,7 +75,7 @@ describe('UserService', () => {
 
       const result = await clientsRepository.create(clientWithoutDto).toPromise();
       expect(validateRif).toHaveBeenCalledTimes(1);
-      expect(validateRif).toHaveBeenCalledWith(clientDto.rif);
+      expect(validateRif).toHaveBeenCalledWith(clientWithoutDto.rif);
       expect(validateReferrerId).not.toHaveBeenCalled()
       expect(createSpy).toBeCalledWith({ ...clientWithoutDto });
       expect(saveSpy).toBeCalledTimes(1);
@@ -86,11 +86,11 @@ describe('UserService', () => {
     it('error trying to save with a referrer that does not exist  ', async () => {
       const createClient = {
         name: 'client test',
-        rif: 'J-3041933-7',
+        rif: 'J-30997933-2',
         referrerId: idNoExist,
       };
       jest.spyOn(clientsRepository, 'validateDontExistRifDb').mockReturnValueOnce(EMPTY);
-      const validateReferrerId = jest.spyOn(clientsRepository, 'validateDontExistIdDb').mockReturnValueOnce(of(null));
+      const validateReferrerId = jest.spyOn(clientsRepository, 'validateDontExistIdDb').mockReturnValueOnce(of(false));
       const saveSpy = jest.spyOn(repository, 'save')
       const createSpy = jest.spyOn(repository, 'create')
       try {
@@ -107,10 +107,10 @@ describe('UserService', () => {
     it('error trying to save with rif exist  ', async () => {
       const createClient = {
         name: 'client test',
-        rif: 'J-3041933-7',
+        rif: 'J-30997933-3',
         referrerId: referrer.id,
       };
-      const validate = jest.spyOn(clientsRepository, 'validateDontExistRifDb').mockReturnValueOnce(of(clientDtoSaved));
+      const validate = jest.spyOn(clientsRepository, 'validateDontExistRifDb').mockReturnValueOnce(of(false));
       jest.spyOn(clientsRepository, 'validateDontExistIdDb').mockReturnValueOnce(EMPTY);
       const saveSpy = jest.spyOn(repository, 'save')
       const createSpy = jest.spyOn(repository, 'create')
@@ -131,25 +131,25 @@ describe('UserService', () => {
     it('Rif dont exist', async () => {
       const createClient = {
         name: 'client test',
-        rif: 'J-3041933-7'
+        rif: 'J-30997933-4'
       };
-      jest.spyOn(repository, 'findOne').mockResolvedValueOnce(null)
+      jest.spyOn(repository, 'findOne').mockResolvedValueOnce(undefined)
       await clientsRepository.validateRif(createClient).toPromise()
       expect(repository.findOne).toHaveBeenCalledTimes(1)
-      expect(repository.findOne).toHaveBeenLastCalledWith(createClient.rif)
+      expect(repository.findOne).toHaveBeenLastCalledWith({rif: createClient.rif})
     })
 
     it('Rif exist', async () => {
       const createClient = {
         name: 'client test',
-        rif: 'J-3041933-7'
+        rif: 'J-30997933-5'
       };
       jest.spyOn(repository, 'findOne').mockResolvedValueOnce(clientDtoSaved)
       try {
         await clientsRepository.validateRif(createClient).toPromise()
       } catch (e) {
         expect(repository.findOne).toHaveBeenCalledTimes(1)
-        expect(repository.findOne).toHaveBeenLastCalledWith(createClient.rif)
+        expect(repository.findOne).toHaveBeenLastCalledWith({rif: createClient.rif})
         expect(e).toBeDefined()
         expect(e.message).toEqual('Client already exist')
       }
@@ -161,7 +161,7 @@ describe('UserService', () => {
     it('client without referrer id', () => {
       const createClient = {
         name: 'client test',
-        rif: 'J-3041933-7'
+        rif: 'J-30997933-6'
       };
       jest.spyOn(repository, 'findOne')
       clientsRepository.ValidateReferrerId(createClient).toPromise()
@@ -171,7 +171,7 @@ describe('UserService', () => {
     it('client with referrer id exist db', async () => {
       const createClient = {
         name: 'client test',
-        rif: 'J-3041933-7',
+        rif: 'J-30997933-7',
         referrerId: 123
       };
       jest.spyOn(repository, 'findOne').mockResolvedValueOnce(clientDtoSaved)     
@@ -183,7 +183,7 @@ describe('UserService', () => {
     it('client with referrer id not exist db', async () => {
       const createClient = {
         name: 'client test',
-        rif: 'J-3041933-7',
+        rif: 'J-30997933-8',
         referrerId: 123
       };
       jest.spyOn(repository, 'findOne').mockResolvedValueOnce(null)

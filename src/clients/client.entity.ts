@@ -6,7 +6,7 @@ export class ClientEntity extends BaseEntity {
   @Column('varchar', { length: 100, nullable: false })
   name: string;
 
-  @Column('varchar', { unique: true, length: 13, nullable: false })
+  @Column({type: 'char', unique: true, length: 13, nullable: false })
   rif: string;
 
   @OneToMany(

@@ -26,7 +26,7 @@ export class ClientsController {
   //   description: 'The record has been successfully created.',
   //   type: ClientReadDto,
   // })
-  postCreate(@Body() clientProspec: ClientDto): Observable<ClientReadDto> {
+  postCreate(@Body() clientProspec: ClientDto): Observable<ClientReadDto> {    
     return this._service.create(clientProspec);
   }
 

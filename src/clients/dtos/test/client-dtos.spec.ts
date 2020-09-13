@@ -18,7 +18,7 @@ describe('Test client dots', () => {
   const client: Client = {
     id: 2,
     name: 'Client 2',
-    rif: 'J-30997933-7',
+    rif: 'J-30997933-0',
     referrerId: referrer.id,
     referrer: referrer,
     createdAt: new Date(),
