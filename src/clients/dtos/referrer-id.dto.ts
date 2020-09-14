@@ -4,7 +4,9 @@ import { IsNumber, IsOptional } from 'class-validator';
 
 @Exclude()
 export class ReferrerIdDto {
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    description: 'id of the client that brings other clients',
+  })
   @Expose()
   @IsNumber()
   @IsOptional()
