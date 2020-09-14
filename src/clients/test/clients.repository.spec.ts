@@ -51,8 +51,7 @@ describe('UserService', () => {
       const validateReferrerId = jest
         .spyOn(clientsRepository, 'validateDontExistIdDb')
         .mockReturnValueOnce(EMPTY);
-      jest.spyOn(repository, 'findOne')
-        .mockResolvedValue(clientDtoSaved);
+      jest.spyOn(repository, 'findOne').mockResolvedValue(clientDtoSaved);
       const saveSpy = jest
         .spyOn(repository, 'save')
         .mockResolvedValue(clientDtoSaved);
@@ -80,8 +79,7 @@ describe('UserService', () => {
       const validateReferrerId = jest
         .spyOn(clientsRepository, 'validateDontExistIdDb')
         .mockReturnValueOnce(EMPTY);
-      jest.spyOn(repository, 'findOne')
-        .mockResolvedValue(clientDtoSaved);
+      jest.spyOn(repository, 'findOne').mockResolvedValue(clientDtoSaved);
       const saveSpy = jest
         .spyOn(repository, 'save')
         .mockResolvedValue(clientDtoSaved);
@@ -203,9 +201,7 @@ describe('UserService', () => {
         referrerId: 123,
       };
       jest.spyOn(repository, 'findOne').mockResolvedValueOnce(clientDtoSaved);
-      await clientsRepository
-        .ValidateReferrerId(createClient)
-        .toPromise();
+      await clientsRepository.ValidateReferrerId(createClient).toPromise();
       expect(repository.findOne).toHaveBeenCalledTimes(1);
       expect(repository.findOne).toHaveBeenLastCalledWith(
         createClient.referrerId,
@@ -220,9 +216,7 @@ describe('UserService', () => {
       };
       jest.spyOn(repository, 'findOne').mockResolvedValueOnce(null);
       try {
-        await clientsRepository
-          .ValidateReferrerId(createClient)
-          .toPromise();
+        await clientsRepository.ValidateReferrerId(createClient).toPromise();
       } catch (e) {
         expect(e).toBeDefined();
         expect(repository.findOne).toHaveBeenCalledTimes(1);
@@ -287,7 +281,7 @@ describe('UserService', () => {
     });
 
     it('return a null result', async () => {
-      jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+      jest.spyOn(repository, 'findOne').mockResolvedValue(undefined);
       try {
         await clientsRepository.update(100, clientDto).toPromise();
       } catch (e) {

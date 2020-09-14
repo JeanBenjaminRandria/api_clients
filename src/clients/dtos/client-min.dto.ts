@@ -15,7 +15,9 @@ export class ClientMinDto {
   @MaxLength(100)
   name: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Unique tax registration code',
+  })
   @Expose()
   @MaxLength(13)
   @IsString()

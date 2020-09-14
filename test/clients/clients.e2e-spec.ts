@@ -12,7 +12,6 @@ import {
 } from '../../src/clients/dtos';
 import { Client } from '../../src/clients/client.interface';
 
-
 describe('CientsController (e2e)', () => {
   let app: INestApplication;
   let clientRepository: Repository<ClientEntity>;
