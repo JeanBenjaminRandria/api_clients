@@ -90,7 +90,7 @@ describe('CientsController (e2e)', () => {
   describe('/clients (POST)', () => {
     it('save ok without referrer', async done => {
       const newClient: ClientDto = {
-        name: 'Client Test',
+        name: 'Client Create',
         rif: 'V-013149501-0',
       };
       await request(app.getHttpServer())
@@ -108,7 +108,7 @@ describe('CientsController (e2e)', () => {
 
     it('save ok with referrer', async done => {
       const newClient: ClientDto = {
-        name: 'Client Test',
+        name: 'Client Create 2',
         rif: 'V-013149501-1',
         referrerId: client.id,
       };
@@ -127,6 +127,7 @@ describe('CientsController (e2e)', () => {
         });
       done();
     });
+
     it('save fail rif repete', async done => {
       const newClient: ClientDto = {
         name: 'Client Test',
@@ -178,13 +179,19 @@ describe('CientsController (e2e)', () => {
     });
 
     it('client exist', async done => {
+      const find = await request(app.getHttpServer()).get(
+        `/clients/${clientToClient.id}`,
+      );
+      const clientOrigin: ClientReadDto = find.body;
+      clientOrigin.name = clientUp.name;
       await request(app.getHttpServer())
-        .put(`/clients/${clientToClient.id}`)
+        .put(`/clients/${clientOrigin.id}`)
         .type('application/json')
         .send(clientUp)
         .expect(200)
         .expect(({ body }) => {
-          expect(body.affected).toBe(1);
+          const clientReceived: ClientReadDto = body;
+          expect(clientReceived).toEqual(clientOrigin);
         });
       done();
     });

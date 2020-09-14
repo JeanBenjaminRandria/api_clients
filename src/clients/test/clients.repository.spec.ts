@@ -12,7 +12,7 @@ import {
   deleteRes,
   referrer,
 } from './data-test';
-import { ClientDto } from '../dtos';
+import { ClientDto, ClientUpdateDto } from '../dtos';
 import { EMPTY, of } from 'rxjs';
 
 describe('UserService', () => {
@@ -265,18 +265,18 @@ describe('UserService', () => {
 
   describe('update', () => {
     it('return one result', async () => {
+      const clientUp: ClientUpdateDto = {
+        name: 'client updated',
+      };
       jest.spyOn(repository, 'findOne').mockResolvedValue(clientDtoSaved);
       jest.spyOn(repository, 'update').mockResolvedValue(updateRes);
-      const foundClient = await clientsRepository
-        .update(clientDtoSaved.id, clientDto)
-        .toPromise();
-      expect(foundClient.affected).toBe(1);
+      await clientsRepository.update(clientDtoSaved.id, clientUp).toPromise();
       expect(repository.findOne).lastCalledWith({
         relations: ['referrer'],
         where: { id: clientDtoSaved.id },
       });
-      expect(repository.findOne).toBeCalledTimes(1);
-      expect(repository.update).lastCalledWith(clientDtoSaved.id, clientDto);
+      expect(repository.findOne).toBeCalledTimes(2);
+      expect(repository.update).lastCalledWith(clientDtoSaved.id, clientUp);
       expect(repository.update).toBeCalledTimes(1);
     });
 
