@@ -8,6 +8,7 @@ import { of } from 'rxjs';
 import { ClientsController } from '../clients.controller';
 import { plainToClass } from 'class-transformer';
 import { ClientReadDto } from '../dtos/client-read.dto';
+import { ClientReadExDto } from '../dtos/client-read-ex.dto';
 
 describe('ClientsController', () => {
   let service: ClientsService;
@@ -90,7 +91,7 @@ describe('ClientsController', () => {
     it('get one client exist ', async () => {
       const getSpy = jest
         .spyOn(service, 'get')
-        .mockReturnValue(of(plainToClass(ClientReadDto, clientDtoSaved)));
+        .mockReturnValue(of(plainToClass(ClientReadExDto, clientDtoSaved)));
       controller.get(clientDtoSaved.id).subscribe(res => {
         expect(res).toEqual(plainToClass(ClientReadDto, clientDtoSaved));
       });
@@ -103,9 +104,9 @@ describe('ClientsController', () => {
     it('Update one client exist ', async () => {
       const updateSpy = jest
         .spyOn(service, 'update')
-        .mockReturnValue(of(plainToClass(ClientReadDto, clientDtoSaved)));
+        .mockReturnValue(of(plainToClass(ClientReadExDto, clientDtoSaved)));
       controller.update(clientDtoSaved.id, clientDto).subscribe(res => {
-        expect(res).toEqual(plainToClass(ClientReadDto, clientDtoSaved));
+        expect(res).toEqual(plainToClass(ClientReadExDto, clientDtoSaved));
       });
       expect(updateSpy).toBeCalledWith(clientDtoSaved.id, clientDto);
       expect(updateSpy).toBeCalledTimes(1);

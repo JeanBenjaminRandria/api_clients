@@ -11,6 +11,7 @@ import {
   ClientUpdateDto,
 } from '../../src/clients/dtos';
 import { Client } from '../../src/clients/client.interface';
+import { ClientReadExDto } from '../../src/clients/dtos/client-read-ex.dto';
 
 describe('CientsController (e2e)', () => {
   let app: INestApplication;
@@ -75,10 +76,11 @@ describe('CientsController (e2e)', () => {
         .get(`/clients/${clientToClient.id}`)
         .expect(200)
         .expect(({ body }) => {
-          const clientObt: ClientReadDto = body;
+          const clientObt: ClientReadExDto = body;
           expect(clientObt.id).toEqual(clientToClient.id);
           expect(clientObt.name).toEqual(clientToClient.name);
           expect(clientObt.rif).toEqual(clientToClient.rif);
+          expect(clientObt.status).toEqual(clientToClient.status);
           expect(clientObt.referrer.id).toEqual(client.id);
           expect(clientObt.referrer.rif).toEqual(client.rif);
           expect(clientObt.referrer.name).toEqual(client.name);
@@ -182,7 +184,7 @@ describe('CientsController (e2e)', () => {
       const find = await request(app.getHttpServer()).get(
         `/clients/${clientToClient.id}`,
       );
-      const clientOrigin: ClientReadDto = find.body;
+      const clientOrigin: ClientReadExDto = find.body;
       clientOrigin.name = clientUp.name;
       await request(app.getHttpServer())
         .put(`/clients/${clientOrigin.id}`)
@@ -190,7 +192,7 @@ describe('CientsController (e2e)', () => {
         .send(clientUp)
         .expect(200)
         .expect(({ body }) => {
-          const clientReceived: ClientReadDto = body;
+          const clientReceived: ClientReadExDto = body;
           expect(clientReceived).toEqual(clientOrigin);
         });
       done();

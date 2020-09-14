@@ -14,6 +14,7 @@ import { Observable } from 'rxjs';
 import { ClientDto, ClientUpdateDto } from './dtos';
 import { DeleteResult } from 'typeorm';
 import { ClientReadDto } from './dtos/client-read.dto';
+import { ClientReadExDto } from './dtos/client-read-ex.dto';
 
 @ApiTags('Client')
 @Controller('clients')
@@ -56,7 +57,7 @@ export class ClientsController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() clientProspect: ClientUpdateDto,
-  ): Observable<ClientReadDto> {
+  ): Observable<ClientReadExDto> {
     return this._service.update(id, clientProspect);
   }
 
