@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository, UpdateResult, DeleteResult } from 'typeorm';
+import { Repository, DeleteResult } from 'typeorm';
 import { Observable, from, of, throwError, merge } from 'rxjs';
 import { map, mergeMap, filter, isEmpty } from 'rxjs/operators';
 import { Client } from './client.interface';
@@ -93,13 +93,10 @@ export class ClientsRepository {
     );
   }
 
-  update(
-    id: number,
-    clientProspect: ClientUpdateDto,
-  ): Observable<UpdateResult> {
-    return this.get(id).pipe(
-      mergeMap(() => this._repository.update(id, clientProspect)),
-    );
+  update(id: number, clientProspect: ClientUpdateDto): Observable<Client> {
+    return this.get(id)
+      .pipe(mergeMap(() => this._repository.update(id, clientProspect)))
+      .pipe(mergeMap(() => this.get(id)));
   }
 
   delete(id: number): Observable<DeleteResult> {

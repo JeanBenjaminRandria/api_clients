@@ -12,7 +12,7 @@ import { ApiTags, ApiCreatedResponse } from '@nestjs/swagger';
 import { ClientsService } from './clients.service';
 import { Observable } from 'rxjs';
 import { ClientDto, ClientUpdateDto } from './dtos';
-import { UpdateResult, DeleteResult } from 'typeorm';
+import { DeleteResult } from 'typeorm';
 import { ClientReadDto } from './dtos/client-read.dto';
 
 @ApiTags('Client')
@@ -56,7 +56,7 @@ export class ClientsController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() clientProspect: ClientUpdateDto,
-  ): Observable<UpdateResult> {
+  ): Observable<ClientReadDto> {
     return this._service.update(id, clientProspect);
   }
 
