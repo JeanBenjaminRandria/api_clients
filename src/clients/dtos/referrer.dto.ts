@@ -5,7 +5,9 @@ import { ClientMinDto } from './client-min.dto';
 
 @Exclude()
 export class ReferrerDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'client that brings other clients',
+  })
   @Expose()
   @IsOptional()
   @Type(() => ClientMinDto)

@@ -5,23 +5,26 @@ import { AppModule } from '../../src/app.module';
 import { Repository } from 'typeorm';
 import { ClientEntity } from '../../src/clients/client.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ClientDto, ClientReadDto, ClientUpdateDto } from '../../src/clients/dtos';
+import {
+  ClientDto,
+  ClientReadDto,
+  ClientUpdateDto,
+} from '../../src/clients/dtos';
 import { Client } from '../../src/clients/client.interface';
-import { plainToClass } from 'class-transformer';
 
 describe('CientsController (e2e)', () => {
   let app: INestApplication;
-  let clientRepository: Repository<ClientEntity>
+  let clientRepository: Repository<ClientEntity>;
   let client: Client;
-  let clientCreate: ClientDto = {
+  const clientCreate: ClientDto = {
     name: 'Client 1',
-    rif: 'J-040518160-5'
-  }
+    rif: 'J-040518160-5',
+  };
   let clientToClient: Client;
-  let clientToClientCreate: ClientDto = {
+  const clientToClientCreate: ClientDto = {
     name: 'Client 2',
-    rif: 'J-040518160-0'
-  }
+    rif: 'J-040518160-0',
+  };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -29,7 +32,7 @@ describe('CientsController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    clientRepository = moduleFixture.get(getRepositoryToken(ClientEntity))
+    clientRepository = moduleFixture.get(getRepositoryToken(ClientEntity));
     await clientRepository.query(
       'TRUNCATE TABLE clients RESTART IDENTITY CASCADE',
     );
@@ -43,7 +46,7 @@ describe('CientsController (e2e)', () => {
 
   afterAll(() => {
     clientRepository.manager.connection.close();
-  })
+  });
 
   it('/client (GET)', async done => {
     await request(app.getHttpServer())
@@ -62,7 +65,7 @@ describe('CientsController (e2e)', () => {
         .get('/clients/1000')
         .expect(404)
         .expect(({ body }) => {
-          expect(body.message).toEqual('Client has not been found')
+          expect(body.message).toEqual('Client has not been found');
         });
       done();
     });
@@ -72,24 +75,24 @@ describe('CientsController (e2e)', () => {
         .get(`/clients/${clientToClient.id}`)
         .expect(200)
         .expect(({ body }) => {
-          const clientObt: ClientReadDto = body
-          expect(clientObt.id).toEqual(clientToClient.id)
-          expect(clientObt.name).toEqual(clientToClient.name)
-          expect(clientObt.rif).toEqual(clientToClient.rif)
-          expect(clientObt.referrer.id).toEqual(client.id)
-          expect(clientObt.referrer.rif).toEqual(client.rif)
-          expect(clientObt.referrer.name).toEqual(client.name)
+          const clientObt: ClientReadDto = body;
+          expect(clientObt.id).toEqual(clientToClient.id);
+          expect(clientObt.name).toEqual(clientToClient.name);
+          expect(clientObt.rif).toEqual(clientToClient.rif);
+          expect(clientObt.referrer.id).toEqual(client.id);
+          expect(clientObt.referrer.rif).toEqual(client.rif);
+          expect(clientObt.referrer.name).toEqual(client.name);
         });
       done();
     });
-  })
+  });
 
   describe('/clients (POST)', () => {
     it('save ok without referrer', async done => {
       const newClient: ClientDto = {
         name: 'Client Test',
-        rif: 'V-013149501-0'
-      }
+        rif: 'V-013149501-0',
+      };
       await request(app.getHttpServer())
         .post('/clients')
         .type('application/json')
@@ -107,8 +110,8 @@ describe('CientsController (e2e)', () => {
       const newClient: ClientDto = {
         name: 'Client Test',
         rif: 'V-013149501-1',
-        referrerId: client.id
-      }
+        referrerId: client.id,
+      };
       await request(app.getHttpServer())
         .post('/clients')
         .type('application/json')
@@ -127,15 +130,15 @@ describe('CientsController (e2e)', () => {
     it('save fail rif repete', async done => {
       const newClient: ClientDto = {
         name: 'Client Test',
-        rif: 'V-013149501-0'
-      }
+        rif: 'V-013149501-0',
+      };
       await request(app.getHttpServer())
         .post('/clients')
         .type('application/json')
         .send(newClient)
         .expect(HttpStatus.BAD_REQUEST)
         .expect(({ body }) => {
-          expect(body.message).toEqual('Client already exist')
+          expect(body.message).toEqual('Client already exist');
         });
       done();
     });
@@ -144,15 +147,15 @@ describe('CientsController (e2e)', () => {
       const newClient: ClientDto = {
         name: 'Client Test',
         rif: 'V-013149501-8',
-        referrerId: 100
-      }
+        referrerId: 100,
+      };
       await request(app.getHttpServer())
         .post('/clients')
         .type('application/json')
         .send(newClient)
         .expect(HttpStatus.BAD_REQUEST)
         .expect(({ body }) => {
-          expect(body.message).toEqual('Referrer does not exist')
+          expect(body.message).toEqual('Referrer does not exist');
         });
       done();
     });
@@ -160,8 +163,8 @@ describe('CientsController (e2e)', () => {
 
   describe('/clients/:id (PUT)', () => {
     const clientUp: ClientUpdateDto = {
-      name: 'Client Modificado'
-    }
+      name: 'Client Modificado',
+    };
     it('Id no exist', async done => {
       await request(app.getHttpServer())
         .put(`/clients/1000`)
@@ -169,7 +172,7 @@ describe('CientsController (e2e)', () => {
         .send(clientUp)
         .expect(404)
         .expect(({ body }) => {
-          expect(body.message).toEqual('Client has not been found')
+          expect(body.message).toEqual('Client has not been found');
         });
       done();
     });
@@ -181,11 +184,9 @@ describe('CientsController (e2e)', () => {
         .send(clientUp)
         .expect(200)
         .expect(({ body }) => {
-          expect(body.affected).toBe(1)
+          expect(body.affected).toBe(1);
         });
       done();
     });
-
-  })
-
+  });
 });
