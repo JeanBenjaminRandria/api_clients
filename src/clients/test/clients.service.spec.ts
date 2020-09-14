@@ -1,11 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClientsService } from '../clients.service';
 import { ClientsRepository } from '../clients.repository';
-import { clientDtoSaved, clientDto, idNoExist, updateRes, deleteRes } from './data-test';
+import {
+  clientDtoSaved,
+  clientDto,
+  updateRes,
+  deleteRes,
+} from './data-test';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ClientEntity } from '../client.entity';
-import { from, of } from 'rxjs';
-import { NotFoundException } from '@nestjs/common';
+import { of } from 'rxjs';
+import { plainToClass } from 'class-transformer';
+import { ClientReadDto } from '../dtos/client-read.dto';
 
 describe('ClientsService', () => {
   let service: ClientsService;
@@ -22,7 +28,7 @@ describe('ClientsService', () => {
             getAll: jest.fn(),
             get: jest.fn(),
             update: jest.fn,
-            delete: jest.fn
+            delete: jest.fn,
           },
         },
         {
@@ -33,13 +39,13 @@ describe('ClientsService', () => {
             find: jest.fn(),
             findOne: jest.fn(),
             update: jest.fn,
-            delete: jest.fn
+            delete: jest.fn,
           },
-        }
+        },
       ],
     }).compile();
 
-    repository = module.get<ClientsRepository>(ClientsRepository)
+    repository = module.get<ClientsRepository>(ClientsRepository);
     service = module.get<ClientsService>(ClientsService);
   });
 
@@ -49,44 +55,38 @@ describe('ClientsService', () => {
 
   describe('Create one Client', () => {
     it('save ', async () => {
-      const createSpy = jest.spyOn(repository, 'create').mockReturnValue(of(clientDtoSaved))
-      const pipeMock = {
-        pipe: jest.fn()
-      }
-      const pipeSpy = jest.spyOn(pipeMock, 'pipe');
-      service.create(clientDto).subscribe((res) => {
-        expect(res).toEqual(clientDtoSaved);
-      })
+      const createSpy = jest
+        .spyOn(repository, 'create')
+        .mockReturnValue(of(clientDtoSaved));
+      service.create(clientDto).subscribe(res => {
+        expect(res).toEqual(plainToClass(ClientReadDto, clientDtoSaved));
+      });
       expect(createSpy).toBeCalledWith({ ...clientDto });
       expect(createSpy).toBeCalledTimes(1);
     });
-  })
+  });
 
   describe('find all Clients', () => {
     it('getAll ', async () => {
-      const getAllSpy = jest.spyOn(repository, 'getAll').mockReturnValue(of([clientDtoSaved]))
-      const pipeMock = {
-        pipe: jest.fn()
-      }
-      const pipeSpy = jest.spyOn(pipeMock, 'pipe');
-      service.getAll().subscribe((res) => {
-        expect(res).toEqual([clientDtoSaved]);
-      })
+      const getAllSpy = jest
+        .spyOn(repository, 'getAll')
+        .mockReturnValue(of([clientDtoSaved]));
+      service.getAll().subscribe(res => {
+        expect(res).toEqual([plainToClass(ClientReadDto, clientDtoSaved)]);
+      });
       expect(getAllSpy).toBeCalledWith();
       expect(getAllSpy).toBeCalledTimes(1);
     });
-  })
+  });
 
   describe('find one Client', () => {
     it('get one client exist ', async () => {
-      const getSpy = jest.spyOn(repository, 'get').mockReturnValue(of(clientDtoSaved))
-      const pipeMock = {
-        pipe: jest.fn()
-      }
-      const pipeSpy = jest.spyOn(pipeMock, 'pipe');
-      service.get(clientDtoSaved.id).subscribe((res) => {
-        expect(res).toEqual(clientDtoSaved);
-      })
+      const getSpy = jest
+        .spyOn(repository, 'get')
+        .mockReturnValue(of(clientDtoSaved));
+      service.get(clientDtoSaved.id).subscribe(res => {
+        expect(res).toEqual(plainToClass(ClientReadDto, clientDtoSaved));
+      });
       expect(getSpy).toBeCalledWith(clientDtoSaved.id);
       expect(getSpy).toBeCalledTimes(1);
     });
@@ -94,14 +94,12 @@ describe('ClientsService', () => {
 
   describe('Update one Client', () => {
     it('Update one client exist ', async () => {
-      const updateSpy = jest.spyOn(repository, 'update').mockReturnValue(of(updateRes))
-      const pipeMock = {
-        pipe: jest.fn()
-      }
-      const pipeSpy = jest.spyOn(pipeMock, 'pipe');
-      service.update(clientDtoSaved.id, clientDto).subscribe((res) => {
+      const updateSpy = jest
+        .spyOn(repository, 'update')
+        .mockReturnValue(of(updateRes));
+      service.update(clientDtoSaved.id, clientDto).subscribe(res => {
         expect(res).toEqual(updateRes);
-      })
+      });
       expect(updateSpy).toBeCalledWith(clientDtoSaved.id, clientDto);
       expect(updateSpy).toBeCalledTimes(1);
     });
@@ -109,14 +107,12 @@ describe('ClientsService', () => {
 
   describe('delete one Client', () => {
     it('get one client exist ', async () => {
-      const getSpy = jest.spyOn(repository, 'delete').mockReturnValue(of(deleteRes))
-      const pipeMock = {
-        pipe: jest.fn()
-      }
-      const pipeSpy = jest.spyOn(pipeMock, 'pipe');
-      service.delete(clientDtoSaved.id).subscribe((res) => {
+      const getSpy = jest
+        .spyOn(repository, 'delete')
+        .mockReturnValue(of(deleteRes));
+      service.delete(clientDtoSaved.id).subscribe(res => {
         expect(res).toEqual(deleteRes);
-      })
+      });
       expect(getSpy).toBeCalledWith(clientDtoSaved.id);
       expect(getSpy).toBeCalledTimes(1);
     });
