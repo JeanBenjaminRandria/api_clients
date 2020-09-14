@@ -23,9 +23,9 @@ export class ClientsRepository {
 
     const find = from(this._repository.findOne({ where: { id }, relations: ['referrer'] }))
     return merge(
-      find.pipe(filter(cli => cli === null))
-          .pipe(mergeMap(()=> throwError(new NotFoundException(`Client was not found`)))),
-      find.pipe(filter(cli => cli !== null))
+      find.pipe(filter(cli => cli === undefined))
+          .pipe(mergeMap(()=> throwError(new NotFoundException(`Client has not been found`)))),
+      find.pipe(filter(cli => cli !== undefined))
     )
 
   }
