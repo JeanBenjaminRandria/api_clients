@@ -5,6 +5,7 @@ import { ClientDto, ClientUpdateDto, ClientReadDto } from './dtos';
 import { map } from 'rxjs/operators';
 import { plainToClass } from 'class-transformer';
 import { ClientReadExDto } from './dtos/client-read-ex.dto';
+import { MessageDto } from './dtos/message.dto';
 
 @Injectable()
 export class ClientsService {
@@ -37,7 +38,7 @@ export class ClientsService {
       .pipe(map(cli => plainToClass(ClientReadExDto, cli)));
   }
 
-  delete(id: number): Observable<string> {
+  delete(id: number): Observable<MessageDto> {
     return this._repository.delete(id);
   }
 }

@@ -16,6 +16,7 @@ import { Observable } from 'rxjs';
 import { ClientDto, ClientUpdateDto } from './dtos';
 import { ClientReadDto } from './dtos/client-read.dto';
 import { ClientReadExDto } from './dtos/client-read-ex.dto';
+import { MessageDto } from './dtos/message.dto';
 
 @ApiTags('Client')
 @Controller('clients')
@@ -58,7 +59,7 @@ export class ClientsController {
   })
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() clientProspect: ClientUpdateDto,
+    @Body() clientProspect: Partial<ClientUpdateDto>,
   ): Observable<ClientReadExDto> {
     return this._service.update(id, clientProspect);
   }
@@ -68,7 +69,7 @@ export class ClientsController {
   })
   @HttpCode(HttpStatus.ACCEPTED)
   @Delete(':id')
-  delete(@Param('id', ParseIntPipe) id: number): Observable<string> {
+  delete(@Param('id', ParseIntPipe) id: number): Observable<MessageDto> {
     return this._service.delete(id);
   }
 }

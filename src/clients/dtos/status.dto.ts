@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
-import { IsEnum, IsString } from 'class-validator';
+import { IsEnum } from 'class-validator';
 import { Status } from '../status.enum';
 
 @Exclude()

@@ -117,7 +117,7 @@ describe('ClientsController', () => {
     it('get one client exist ', async () => {
       const getSpy = jest
         .spyOn(service, 'delete')
-        .mockReturnValue(of('recived'));
+        .mockReturnValue(of({ message: 'success' }));
       controller.delete(clientDtoSaved.id);
       expect(getSpy).toBeCalledWith(clientDtoSaved.id);
       expect(getSpy).toBeCalledTimes(1);

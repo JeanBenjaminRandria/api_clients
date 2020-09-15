@@ -7,10 +7,11 @@ import {
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Observable, from, of, throwError, merge } from 'rxjs';
-import { map, mergeMap, filter, isEmpty, tap } from 'rxjs/operators';
+import { map, mergeMap, filter, isEmpty } from 'rxjs/operators';
 import { Client } from './client.interface';
 import { ClientDto, ClientUpdateDto } from './dtos';
 import { Status } from './status.enum';
+import { MessageDto } from './dtos/message.dto';
 
 @Injectable()
 export class ClientsRepository {
@@ -100,29 +101,12 @@ export class ClientsRepository {
   }
 
   update(id: number, clientProspect: ClientUpdateDto): Observable<Client> {
-    for (const property in clientProspect) {
-      if (
-        clientProspect[property] === null ||
-        clientProspect[property] === undefined
-      ) {
-        delete clientProspect[property];
-      }
-    }
-
-    return (
-      this.get(id)
-        .pipe(mergeMap(() => this._repository.update(id, clientProspect)))
-        // .pipe(
-        //   tap(
-        //     next => console.log(next),
-        //     error => console.log('error', error),
-        //   ),
-        // )
-        .pipe(mergeMap(() => this.get(id)))
-    );
+    return this.get(id)
+      .pipe(mergeMap(() => this._repository.update(id, clientProspect)))
+      .pipe(mergeMap(() => this.get(id)));
   }
 
-  delete(id: number): Observable<string> {
+  delete(id: number): Observable<MessageDto> {
     const find = from(this._repository.findOne(id))
       .pipe(filter(cli => cli !== undefined))
       .pipe(
@@ -132,7 +116,7 @@ export class ClientsRepository {
         }),
       )
       .pipe(mergeMap(cli => from(this._repository.save(cli))))
-      .pipe(map(() => 'recived'));
+      .pipe(mergeMap(() => of({ message: 'success' })));
 
     return find;
   }

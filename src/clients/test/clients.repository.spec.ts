@@ -324,7 +324,7 @@ describe('UserService', () => {
       //   complete: () => console.log(' OK complete')
       // })
       const foundClient = await clientsRepository.delete(1).toPromise();
-      expect(foundClient).toEqual('recived');
+      expect(foundClient).toEqual({ message: 'success' });
       expect(find).toHaveBeenCalledTimes(1);
       expect(saved).toHaveBeenCalledTimes(1);
     });
