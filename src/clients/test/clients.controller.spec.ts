@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClientsService } from '../clients.service';
 import { ClientsRepository } from '../clients.repository';
-import { clientDtoSaved, clientDto, deleteRes } from './data-test';
+import { clientDtoSaved, clientDto } from './data-test';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ClientEntity } from '../client.entity';
 import { of } from 'rxjs';
@@ -93,7 +93,7 @@ describe('ClientsController', () => {
         .spyOn(service, 'get')
         .mockReturnValue(of(plainToClass(ClientReadExDto, clientDtoSaved)));
       controller.get(clientDtoSaved.id).subscribe(res => {
-        expect(res).toEqual(plainToClass(ClientReadDto, clientDtoSaved));
+        expect(res).toEqual(plainToClass(ClientReadExDto, clientDtoSaved));
       });
       expect(getSpy).toBeCalledWith(clientDtoSaved.id);
       expect(getSpy).toBeCalledTimes(1);
@@ -117,10 +117,8 @@ describe('ClientsController', () => {
     it('get one client exist ', async () => {
       const getSpy = jest
         .spyOn(service, 'delete')
-        .mockReturnValue(of(deleteRes));
-      controller.delete(clientDtoSaved.id).subscribe(res => {
-        expect(res).toEqual(deleteRes);
-      });
+        .mockReturnValue(of('recived'));
+      controller.delete(clientDtoSaved.id);
       expect(getSpy).toBeCalledWith(clientDtoSaved.id);
       expect(getSpy).toBeCalledTimes(1);
     });

@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { ClientsRepository } from './clients.repository';
 import { Observable } from 'rxjs';
 import { ClientDto, ClientUpdateDto, ClientReadDto } from './dtos';
-import { DeleteResult } from 'typeorm';
 import { map } from 'rxjs/operators';
 import { plainToClass } from 'class-transformer';
 import { ClientReadExDto } from './dtos/client-read-ex.dto';
@@ -38,7 +37,7 @@ export class ClientsService {
       .pipe(map(cli => plainToClass(ClientReadExDto, cli)));
   }
 
-  delete(id: number): Observable<DeleteResult> {
+  delete(id: number): Observable<string> {
     return this._repository.delete(id);
   }
 }

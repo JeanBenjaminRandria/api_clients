@@ -164,13 +164,13 @@ describe('CientsController (e2e)', () => {
     });
   });
 
-  describe('/clients/:id (PUT)', () => {
+  describe('/clients/:id (PATH)', () => {
     const clientUp: ClientUpdateDto = {
       name: 'Client Modificado',
     };
     it('Id no exist', async done => {
       await request(app.getHttpServer())
-        .put(`/clients/1000`)
+        .patch(`/clients/1000`)
         .type('application/json')
         .send(clientUp)
         .expect(404)
@@ -187,7 +187,7 @@ describe('CientsController (e2e)', () => {
       const clientOrigin: ClientReadExDto = find.body;
       clientOrigin.name = clientUp.name;
       await request(app.getHttpServer())
-        .put(`/clients/${clientOrigin.id}`)
+        .patch(`/clients/${clientOrigin.id}`)
         .type('application/json')
         .send(clientUp)
         .expect(200)
@@ -195,6 +195,31 @@ describe('CientsController (e2e)', () => {
           const clientReceived: ClientReadExDto = body;
           expect(clientReceived).toEqual(clientOrigin);
         });
+      done();
+    });
+  });
+
+  describe('clients/:id (DELETE)', () => {
+    it('Delete id no found', async done => {
+      await request(app.getHttpServer())
+        .delete(`/clients/1000`)
+        .expect(202);
+      done();
+    });
+
+    it('Delete id no found', async done => {
+      const getAllActive = await request(app.getHttpServer()).get('/clients');
+      await request(app.getHttpServer())
+        .delete(`/clients/${clientToClient.id}`)
+        .expect(202);
+      const getAllActiveNew = await request(app.getHttpServer()).get(
+        '/clients',
+      );
+
+      expect(getAllActive.body.length).toBeGreaterThan(
+        getAllActiveNew.body.length,
+      );
+
       done();
     });
   });

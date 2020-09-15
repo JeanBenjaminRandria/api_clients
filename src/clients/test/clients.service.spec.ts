@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClientsService } from '../clients.service';
 import { ClientsRepository } from '../clients.repository';
-import { clientDtoSaved, clientDto, deleteRes } from './data-test';
+import { clientDtoSaved, clientDto } from './data-test';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ClientEntity } from '../client.entity';
 import { of } from 'rxjs';
@@ -105,9 +105,9 @@ describe('ClientsService', () => {
     it('get one client exist ', async () => {
       const getSpy = jest
         .spyOn(repository, 'delete')
-        .mockReturnValue(of(deleteRes));
+        .mockReturnValue(of('recived'));
       service.delete(clientDtoSaved.id).subscribe(res => {
-        expect(res).toEqual(deleteRes);
+        expect(res).toEqual('recived');
       });
       expect(getSpy).toBeCalledWith(clientDtoSaved.id);
       expect(getSpy).toBeCalledTimes(1);

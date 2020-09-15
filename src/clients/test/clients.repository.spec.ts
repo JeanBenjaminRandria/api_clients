@@ -9,11 +9,11 @@ import {
   clientDtoSaved,
   idNoExist,
   updateRes,
-  deleteRes,
   referrer,
 } from './data-test';
 import { ClientDto, ClientUpdateDto } from '../dtos';
 import { EMPTY, of } from 'rxjs';
+import { Status } from '../status.enum';
 
 describe('UserService', () => {
   let repository: Repository<Client>;
@@ -258,7 +258,10 @@ describe('UserService', () => {
       jest.spyOn(repository, 'find').mockResolvedValue([clientDtoSaved]);
       const foundClient = await clientsRepository.getAll().toPromise();
       expect(foundClient).toEqual([clientDtoSaved]);
-      expect(repository.find).lastCalledWith({ relations: ['referrer'] });
+      expect(repository.find).lastCalledWith({
+        where: { status: Status.ACTIVE },
+        relations: ['referrer'],
+      });
       expect(repository.find).toBeCalledTimes(1);
     });
   });
@@ -291,21 +294,39 @@ describe('UserService', () => {
   });
 
   describe('Delete', () => {
-    it('return result delete', async () => {
-      jest.spyOn(repository, 'delete').mockResolvedValue(deleteRes);
-      const foundClient = await clientsRepository.delete(1).toPromise();
-      expect(foundClient).toEqual(deleteRes);
-      expect(repository.delete).lastCalledWith(1);
-      expect(repository.delete).toBeCalledTimes(1);
+    it('Delete with id no found', async () => {
+      const find = jest
+        .spyOn(repository, 'findOne')
+        .mockResolvedValue(undefined);
+      const saved = jest.spyOn(repository, 'save').mockResolvedValue(undefined);
+      let foundClient;
+      clientsRepository.delete(1).subscribe({
+        next: x => {
+          foundClient = x;
+        },
+      });
+      // const foundClient = await clientsRepository.delete(1).toPromise();
+      expect(foundClient).toEqual(undefined);
+      expect(find).toHaveBeenCalledTimes(1);
+      expect(saved).not.toBeCalled();
     });
 
     it('return result delete', async () => {
-      deleteRes.affected = 0;
-      jest.spyOn(repository, 'delete').mockResolvedValue(deleteRes);
-      const foundClient = await clientsRepository.delete(100).toPromise();
-      expect(foundClient).toEqual(deleteRes);
-      expect(repository.delete).lastCalledWith(100);
-      expect(repository.delete).toBeCalledTimes(1);
+      const find = jest
+        .spyOn(repository, 'findOne')
+        .mockResolvedValue(clientDtoSaved);
+      const saved = jest
+        .spyOn(repository, 'save')
+        .mockResolvedValue(clientDtoSaved);
+      // clientsRepository.delete(1).subscribe({
+      //   next: x => console.log('Ok', x),
+      //   error: e => console.log('error Ok', e),
+      //   complete: () => console.log(' OK complete')
+      // })
+      const foundClient = await clientsRepository.delete(1).toPromise();
+      expect(foundClient).toEqual('recived');
+      expect(find).toHaveBeenCalledTimes(1);
+      expect(saved).toHaveBeenCalledTimes(1);
     });
   });
 });

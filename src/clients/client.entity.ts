@@ -9,8 +9,8 @@ export class ClientEntity extends BaseEntity {
   @Column({ type: 'char', unique: true, length: 13, nullable: false })
   rif: string;
 
-  @Column('varchar', {length: 8, default: 'Active'})
-  status: string
+  @Column('varchar', { length: 8, default: 'Active' })
+  status: string;
 
   @OneToMany(
     type => ClientEntity,

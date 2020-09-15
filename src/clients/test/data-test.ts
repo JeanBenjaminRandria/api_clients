@@ -1,5 +1,6 @@
 import { ClientDto } from '../dtos';
 import { Client } from '../client.interface';
+import { Status } from '../status.enum';
 
 export const referrer: Client = {
   id: 123,
@@ -7,6 +8,7 @@ export const referrer: Client = {
   updatedAt: new Date(),
   name: 'client referrer',
   rif: 'J-30997933-9',
+  status: Status.ACTIVE,
 };
 
 export const clientDto: ClientDto = {
@@ -21,6 +23,7 @@ export const clientDtoSaved: Client = {
   updatedAt: new Date(),
   ...clientDto,
   referrer: { ...referrer },
+  status: Status.ACTIVE,
 };
 
 export const idNoExist = 1000;
