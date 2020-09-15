@@ -1,7 +1,9 @@
 import { plainToClass } from 'class-transformer';
-import { Client } from 'src/clients/client.interface';
+import { Client } from '../../client.interface';
+import { Status } from '../../status.enum';
 import { ClientMicroDto } from '..';
 import { ClientMinDto } from '../client-min.dto';
+import { ClientReadExDto } from '../client-read-ex.dto';
 import { ClientReadDto } from '../client-read.dto';
 import { ClientUpdateDto } from '../client-update.dto';
 import { ClientDto } from '../client.dtos';
@@ -11,6 +13,7 @@ describe('Test client dots', () => {
     id: 1,
     name: 'Client 1',
     rif: 'J-30997933-0',
+    status: Status.ACTIVE,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -21,6 +24,7 @@ describe('Test client dots', () => {
     rif: 'J-30997933-0',
     referrerId: referrer.id,
     referrer: referrer,
+    status: Status.ACTIVE,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -56,6 +60,22 @@ describe('Test client dots', () => {
       },
     };
     const microDto = plainToClass(ClientReadDto, client);
+    expect(microDto).toEqual(expectDto);
+  });
+
+  it('Client Read Extends Dto', () => {
+    const expectDto: ClientReadExDto = {
+      id: client.id,
+      name: client.name,
+      rif: client.rif,
+      status: client.status,
+      referrer: {
+        id: referrer.id,
+        name: referrer.name,
+        rif: referrer.rif,
+      },
+    };
+    const microDto = plainToClass(ClientReadExDto, client);
     expect(microDto).toEqual(expectDto);
   });
 

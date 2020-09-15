@@ -5,11 +5,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository, DeleteResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Observable, from, of, throwError, merge } from 'rxjs';
-import { map, mergeMap, filter, isEmpty } from 'rxjs/operators';
+import { map, mergeMap, filter, isEmpty, tap } from 'rxjs/operators';
 import { Client } from './client.interface';
 import { ClientDto, ClientUpdateDto } from './dtos';
+import { Status } from './status.enum';
 
 @Injectable()
 export class ClientsRepository {
@@ -19,7 +20,12 @@ export class ClientsRepository {
   ) {}
 
   getAll(): Observable<Client[]> {
-    return from(this._repository.find({ relations: ['referrer'] }));
+    return from(
+      this._repository.find({
+        where: { status: Status.ACTIVE },
+        relations: ['referrer'],
+      }),
+    );
   }
 
   get(id: number): Observable<Client> {
@@ -94,12 +100,40 @@ export class ClientsRepository {
   }
 
   update(id: number, clientProspect: ClientUpdateDto): Observable<Client> {
-    return this.get(id)
-      .pipe(mergeMap(() => this._repository.update(id, clientProspect)))
-      .pipe(mergeMap(() => this.get(id)));
+    for (const property in clientProspect) {
+      if (
+        clientProspect[property] === null ||
+        clientProspect[property] === undefined
+      ) {
+        delete clientProspect[property];
+      }
+    }
+
+    return (
+      this.get(id)
+        .pipe(mergeMap(() => this._repository.update(id, clientProspect)))
+        // .pipe(
+        //   tap(
+        //     next => console.log(next),
+        //     error => console.log('error', error),
+        //   ),
+        // )
+        .pipe(mergeMap(() => this.get(id)))
+    );
   }
 
-  delete(id: number): Observable<DeleteResult> {
-    return from(this._repository.delete(id));
+  delete(id: number): Observable<string> {
+    const find = from(this._repository.findOne(id))
+      .pipe(filter(cli => cli !== undefined))
+      .pipe(
+        map(cli => {
+          cli.status = Status.INACTIVE;
+          return cli;
+        }),
+      )
+      .pipe(mergeMap(cli => from(this._repository.save(cli))))
+      .pipe(map(() => 'recived'));
+
+    return find;
   }
 }

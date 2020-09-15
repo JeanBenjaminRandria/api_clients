@@ -1,12 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClientsService } from '../clients.service';
 import { ClientsRepository } from '../clients.repository';
-import { clientDtoSaved, clientDto, deleteRes } from './data-test';
+import { clientDtoSaved, clientDto } from './data-test';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ClientEntity } from '../client.entity';
 import { of } from 'rxjs';
 import { plainToClass } from 'class-transformer';
 import { ClientReadDto } from '../dtos/client-read.dto';
+import { ClientReadExDto } from '../dtos/client-read-ex.dto';
 
 describe('ClientsService', () => {
   let service: ClientsService;
@@ -80,7 +81,7 @@ describe('ClientsService', () => {
         .spyOn(repository, 'get')
         .mockReturnValue(of(clientDtoSaved));
       service.get(clientDtoSaved.id).subscribe(res => {
-        expect(res).toEqual(plainToClass(ClientReadDto, clientDtoSaved));
+        expect(res).toEqual(plainToClass(ClientReadExDto, clientDtoSaved));
       });
       expect(getSpy).toBeCalledWith(clientDtoSaved.id);
       expect(getSpy).toBeCalledTimes(1);
@@ -93,7 +94,7 @@ describe('ClientsService', () => {
         .spyOn(repository, 'update')
         .mockReturnValue(of(clientDtoSaved));
       service.update(clientDtoSaved.id, clientDto).subscribe(res => {
-        expect(res).toEqual(plainToClass(ClientReadDto, clientDtoSaved));
+        expect(res).toEqual(plainToClass(ClientReadExDto, clientDtoSaved));
       });
       expect(updateSpy).toBeCalledWith(clientDtoSaved.id, clientDto);
       expect(updateSpy).toBeCalledTimes(1);
@@ -104,9 +105,9 @@ describe('ClientsService', () => {
     it('get one client exist ', async () => {
       const getSpy = jest
         .spyOn(repository, 'delete')
-        .mockReturnValue(of(deleteRes));
+        .mockReturnValue(of('recived'));
       service.delete(clientDtoSaved.id).subscribe(res => {
-        expect(res).toEqual(deleteRes);
+        expect(res).toEqual('recived');
       });
       expect(getSpy).toBeCalledWith(clientDtoSaved.id);
       expect(getSpy).toBeCalledTimes(1);

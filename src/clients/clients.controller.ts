@@ -5,15 +5,17 @@ import {
   Body,
   Param,
   ParseIntPipe,
-  Put,
   Delete,
+  HttpCode,
+  HttpStatus,
+  Patch,
 } from '@nestjs/common';
 import { ApiTags, ApiCreatedResponse } from '@nestjs/swagger';
 import { ClientsService } from './clients.service';
 import { Observable } from 'rxjs';
 import { ClientDto, ClientUpdateDto } from './dtos';
-import { DeleteResult } from 'typeorm';
 import { ClientReadDto } from './dtos/client-read.dto';
+import { ClientReadExDto } from './dtos/client-read-ex.dto';
 
 @ApiTags('Client')
 @Controller('clients')
@@ -31,7 +33,7 @@ export class ClientsController {
 
   @Get()
   @ApiCreatedResponse({
-    description: 'Get all clients',
+    description: 'Get all clients actives',
     type: [ClientReadDto],
   })
   getAllClients(): Observable<ClientReadDto[]> {
@@ -42,26 +44,31 @@ export class ClientsController {
   @ApiCreatedResponse({
     description:
       'Get one client by id, if it does not find a NoFOUND error will be returned',
-    type: ClientReadDto,
+    type: ClientReadExDto,
   })
-  get(@Param('id', ParseIntPipe) id: number): Observable<ClientReadDto> {
+  get(@Param('id', ParseIntPipe) id: number): Observable<ClientReadExDto> {
     return this._service.get(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @ApiCreatedResponse({
     description:
       'modify client by id, only name rif or referrerId, if it does not find a NoFOUND error will be returned',
+    type: ClientReadExDto,
   })
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() clientProspect: ClientUpdateDto,
-  ): Observable<ClientReadDto> {
+  ): Observable<ClientReadExDto> {
     return this._service.update(id, clientProspect);
   }
 
+  @ApiCreatedResponse({
+    description: 'modify status client by id',
+  })
+  @HttpCode(HttpStatus.ACCEPTED)
   @Delete(':id')
-  delete(@Param('id', ParseIntPipe) id: number): Observable<DeleteResult> {
+  delete(@Param('id', ParseIntPipe) id: number): Observable<string> {
     return this._service.delete(id);
   }
 }
