@@ -41,6 +41,16 @@ export class ClientsController {
     return this._service.getAll();
   }
 
+  @Get('/referrer/:name')
+  @ApiCreatedResponse({
+    description: 'Get all clients actives by referrer',
+    type: [ClientReadDto],
+  })
+  getAllByReferrer(@Param('name') name: string): Observable<ClientReadDto[]> {
+    return this._service
+    .getAllByReferrer(name);
+  }
+
   @Get(':id')
   @ApiCreatedResponse({
     description:

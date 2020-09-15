@@ -18,7 +18,7 @@ export class ClientsRepository {
   constructor(
     @InjectRepository(ClientEntity)
     private readonly _repository: Repository<ClientEntity>,
-  ) {}
+  ) { }
 
   getAll(): Observable<Client[]> {
     return from(
@@ -26,6 +26,12 @@ export class ClientsRepository {
         where: { status: Status.ACTIVE },
         relations: ['referrer'],
       }),
+    );
+  }
+
+  getAllByReferrer(name: string): Observable<Client[]> {
+    return from(
+      this._repository.find({where: { name }, relations: ['referrers']})
     );
   }
 

@@ -12,4 +12,9 @@ export class ReferrerDto {
   @IsOptional()
   @Type(() => ClientMinDto)
   referrer?: ClientMinDto;
+
+  @Expose()
+  @IsOptional()
+  @Type(() => ClientMinDto)
+  referrers?: ClientMinDto[];
 }
