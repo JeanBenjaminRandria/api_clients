@@ -25,8 +25,8 @@ export class ClientsService {
 
   getAllByReferrer(name: string): Observable<ClientReadDto[]> {
     return this._repository
-    .getAllByReferrer(name)
-    .pipe(map(client => plainToClass(ClientReadDto, client)));
+      .getAllByReferrer(name)
+      .pipe(map(client => plainToClass(ClientReadDto, client)));
   }
 
   get(id: number): Observable<ClientReadExDto> {

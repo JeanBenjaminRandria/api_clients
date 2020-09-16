@@ -47,8 +47,7 @@ export class ClientsController {
     type: [ClientReadDto],
   })
   getAllByReferrer(@Param('name') name: string): Observable<ClientReadDto[]> {
-    return this._service
-    .getAllByReferrer(name);
+    return this._service.getAllByReferrer(name);
   }
 
   @Get(':id')

@@ -12,10 +12,9 @@ import {
   referrer,
 } from './data-test';
 import { ClientDto, ClientUpdateDto } from '../dtos';
-import { EMPTY, of } from 'rxjs';
 import { Status } from '../status.enum';
 
-describe('UserService', () => {
+describe('Clients Repository', () => {
   let repository: Repository<Client>;
   let clientsRepository: ClientsRepository;
 
@@ -45,26 +44,17 @@ describe('UserService', () => {
 
   describe('Save new client', () => {
     it('save ', async () => {
-      const validateRif = jest
-        .spyOn(clientsRepository, 'validateDontExistRifDb')
-        .mockReturnValueOnce(EMPTY);
-      const validateReferrerId = jest
-        .spyOn(clientsRepository, 'validateDontExistIdDb')
-        .mockReturnValueOnce(EMPTY);
-      jest.spyOn(repository, 'findOne').mockResolvedValue(clientDtoSaved);
+      jest.spyOn(repository, 'findOne').mockResolvedValue(clientDtoSaved); //find referrer id
+      jest.spyOn(repository, 'findOne').mockResolvedValueOnce(undefined); //find rif
+      jest.spyOn(repository, 'findOne').mockResolvedValueOnce(clientDtoSaved); // fin client saved
+      const createSpy = jest.spyOn(repository, 'create');
       const saveSpy = jest
         .spyOn(repository, 'save')
         .mockResolvedValue(clientDtoSaved);
-      const createSpy = jest.spyOn(repository, 'create');
-
       const result = await clientsRepository.create(clientDto).toPromise();
-      expect(validateRif).toHaveBeenCalledTimes(1);
-      expect(validateRif).toHaveBeenCalledWith(clientDto.rif);
-      expect(validateReferrerId).toHaveBeenCalledTimes(1);
-      expect(validateReferrerId).toHaveBeenCalledWith(clientDto.referrerId);
-      expect(createSpy).toBeCalledWith({ ...clientDto });
-      expect(saveSpy).toBeCalledTimes(1);
-      expect(createSpy).toBeCalledTimes(1);
+      expect(repository.findOne).toHaveBeenCalledTimes(3);
+      expect(createSpy).toHaveBeenCalledTimes(1);
+      expect(saveSpy).toHaveBeenCalledTimes(1);
       expect(result.id).toBeDefined();
     });
 
@@ -73,27 +63,20 @@ describe('UserService', () => {
         name: 'client test',
         rif: 'J-30997933-1',
       };
-      const validateRif = jest
-        .spyOn(clientsRepository, 'validateDontExistRifDb')
-        .mockReturnValueOnce(EMPTY);
-      const validateReferrerId = jest
-        .spyOn(clientsRepository, 'validateDontExistIdDb')
-        .mockReturnValueOnce(EMPTY);
-      jest.spyOn(repository, 'findOne').mockResolvedValue(clientDtoSaved);
+
+      jest.spyOn(repository, 'findOne');
+      jest.spyOn(repository, 'findOne').mockResolvedValueOnce(undefined); //find rif
+      jest.spyOn(repository, 'findOne').mockResolvedValueOnce(clientDtoSaved); // fin client saved
+      const createSpy = jest.spyOn(repository, 'create');
       const saveSpy = jest
         .spyOn(repository, 'save')
         .mockResolvedValue(clientDtoSaved);
-      const createSpy = jest.spyOn(repository, 'create');
-
       const result = await clientsRepository
         .create(clientWithoutDto)
         .toPromise();
-      expect(validateRif).toHaveBeenCalledTimes(1);
-      expect(validateRif).toHaveBeenCalledWith(clientWithoutDto.rif);
-      expect(validateReferrerId).not.toHaveBeenCalled();
-      expect(createSpy).toBeCalledWith({ ...clientWithoutDto });
-      expect(saveSpy).toBeCalledTimes(1);
-      expect(createSpy).toBeCalledTimes(1);
+      expect(repository.findOne).toHaveBeenCalledTimes(2);
+      expect(createSpy).toHaveBeenCalledTimes(1);
+      expect(saveSpy).toHaveBeenCalledTimes(1);
       expect(result.id).toBeDefined();
     });
 
@@ -103,23 +86,19 @@ describe('UserService', () => {
         rif: 'J-30997933-2',
         referrerId: idNoExist,
       };
-      jest
-        .spyOn(clientsRepository, 'validateDontExistRifDb')
-        .mockReturnValueOnce(EMPTY);
-      const validateReferrerId = jest
-        .spyOn(clientsRepository, 'validateDontExistIdDb')
-        .mockReturnValueOnce(of(false));
-      const saveSpy = jest.spyOn(repository, 'save');
+      jest.spyOn(repository, 'findOne');
+      jest.spyOn(repository, 'findOne').mockResolvedValueOnce(undefined); // find referrer id
+      jest.spyOn(repository, 'findOne').mockResolvedValueOnce(undefined); //find rif
       const createSpy = jest.spyOn(repository, 'create');
+      const saveSpy = jest
+        .spyOn(repository, 'save')
+        .mockResolvedValue(clientDtoSaved);
       try {
         await clientsRepository.create(createClient).toPromise();
       } catch (e) {
-        expect(validateReferrerId).toHaveBeenCalledWith(
-          createClient.referrerId,
-        );
-        expect(createSpy).not.toHaveBeenCalled();
-        expect(saveSpy).not.toHaveBeenCalled();
-        expect(e).toBeDefined();
+        expect(repository.findOne).toHaveBeenCalledTimes(2);
+        expect(createSpy).not.toBeCalled();
+        expect(saveSpy).not.toBeCalled();
         expect(e.message).toEqual('Referrer does not exist');
       }
     });
@@ -130,103 +109,101 @@ describe('UserService', () => {
         rif: 'J-30997933-3',
         referrerId: referrer.id,
       };
-      const validate = jest
-        .spyOn(clientsRepository, 'validateDontExistRifDb')
-        .mockReturnValueOnce(of(false));
-      jest
-        .spyOn(clientsRepository, 'validateDontExistIdDb')
-        .mockReturnValueOnce(EMPTY);
-      const saveSpy = jest.spyOn(repository, 'save');
+      jest.spyOn(repository, 'findOne');
+      jest.spyOn(repository, 'findOne').mockResolvedValueOnce(clientDtoSaved); //find referrer id
+      jest.spyOn(repository, 'findOne').mockResolvedValueOnce(clientDtoSaved); //find rif
       const createSpy = jest.spyOn(repository, 'create');
+      const saveSpy = jest
+        .spyOn(repository, 'save')
+        .mockResolvedValue(clientDtoSaved);
       try {
         await clientsRepository.create(createClient).toPromise();
       } catch (e) {
-        expect(validate).toHaveBeenCalledWith(createClient.rif);
-        expect(createSpy).not.toHaveBeenCalled();
-        expect(saveSpy).not.toHaveBeenCalled();
-        expect(e).toBeDefined();
+        expect(repository.findOne).toHaveBeenCalledTimes(2);
+        expect(createSpy).not.toBeCalled();
+        expect(saveSpy).not.toBeCalled();
         expect(e.message).toEqual('Client already exist');
       }
     });
   });
 
-  describe(' validate rif client', () => {
-    it('Rif dont exist', async () => {
-      const createClient = {
-        name: 'client test',
-        rif: 'J-30997933-4',
-      };
-      jest.spyOn(repository, 'findOne').mockResolvedValueOnce(undefined);
-      await clientsRepository.validateRif(createClient).toPromise();
-      expect(repository.findOne).toHaveBeenCalledTimes(1);
-      expect(repository.findOne).toHaveBeenLastCalledWith({
-        rif: createClient.rif,
-      });
-    });
+  // describe(' validate rif client', () => {
+  //   it('Rif dont exist', async () => {
+  //     const createClient = {
+  //       name: 'client test',
+  //       rif: 'J-30997933-4',
+  //     };
+  //     jest.spyOn(repository, 'findOne').mockResolvedValueOnce(undefined);
+  //     await clientsRepository.validateRif(createClient).toPromise();
+  //     expect(repository.findOne).toHaveBeenCalledTimes(1);
+  //     expect(repository.findOne).toHaveBeenLastCalledWith({
+  //       rif: createClient.rif,
+  //     });
+  //   });
 
-    it('Rif exist', async () => {
-      const createClient = {
-        name: 'client test',
-        rif: 'J-30997933-5',
-      };
-      jest.spyOn(repository, 'findOne').mockResolvedValueOnce(clientDtoSaved);
-      try {
-        await clientsRepository.validateRif(createClient).toPromise();
-      } catch (e) {
-        expect(repository.findOne).toHaveBeenCalledTimes(1);
-        expect(repository.findOne).toHaveBeenLastCalledWith({
-          rif: createClient.rif,
-        });
-        expect(e).toBeDefined();
-        expect(e.message).toEqual('Client already exist');
-      }
-    });
-  });
+  //   it('Rif exist', async () => {
+  //     const createClient = {
+  //       name: 'client test',
+  //       rif: 'J-30997933-5',
+  //     };
+  //     jest.spyOn(repository, 'findOne').mockResolvedValueOnce(clientDtoSaved);
+  //     try {
+  //       await clientsRepository.validateRif(createClient).toPromise();
+  //     } catch (e) {
+  //       expect(repository.findOne).toHaveBeenCalledTimes(1);
+  //       expect(repository.findOne).toHaveBeenLastCalledWith({
+  //         rif: createClient.rif,
+  //       });
+  //       expect(e).toBeDefined();
+  //       expect(e.message).toEqual('Client already exist');
+  //     }
+  //   });
+  // });
 
-  describe('validate referrer', () => {
-    it('client without referrer id', () => {
-      const createClient = {
-        name: 'client test',
-        rif: 'J-30997933-6',
-      };
-      jest.spyOn(repository, 'findOne');
-      clientsRepository.ValidateReferrerId(createClient).toPromise();
-      expect(repository.findOne).not.toHaveBeenCalled();
-    });
+  // describe('validate referrer', () => {
+  //   it('client without referrer id', () => {
+  //     const createClient = {
+  //       name: 'client test',
+  //       rif: 'J-30997933-6',
+  //     };
+  //     jest.spyOn(repository, 'findOne');
+  //     clientsRepository.ValidateReferrerId(createClient).toPromise();
+  //     expect(repository.findOne).not.toHaveBeenCalled();
+  //   });
 
-    it('client with referrer id exist db', async () => {
-      const createClient = {
-        name: 'client test',
-        rif: 'J-30997933-7',
-        referrerId: 123,
-      };
-      jest.spyOn(repository, 'findOne').mockResolvedValueOnce(clientDtoSaved);
-      await clientsRepository.ValidateReferrerId(createClient).toPromise();
-      expect(repository.findOne).toHaveBeenCalledTimes(1);
-      expect(repository.findOne).toHaveBeenLastCalledWith(
-        createClient.referrerId,
-      );
-    });
+  //   it('client with referrer id exist db', async () => {
+  //     const createClient = {
+  //       name: 'client test',
+  //       rif: 'J-30997933-7',
+  //       referrerId: 123,
+  //     };
+  //     jest.spyOn(repository, 'findOne').mockResolvedValueOnce(clientDtoSaved);
+  //     await clientsRepository.ValidateReferrerId(createClient).toPromise();
+  //     expect(repository.findOne).toHaveBeenCalledTimes(1);
+  //     expect(repository.findOne).toHaveBeenLastCalledWith(
+  //       { "where": { "id": createClient.referrerId } },
+  //     );
+  //   });
 
-    it('client with referrer id not exist db', async () => {
-      const createClient = {
-        name: 'client test',
-        rif: 'J-30997933-8',
-        referrerId: 123,
-      };
-      jest.spyOn(repository, 'findOne').mockResolvedValueOnce(null);
-      try {
-        await clientsRepository.ValidateReferrerId(createClient).toPromise();
-      } catch (e) {
-        expect(e).toBeDefined();
-        expect(repository.findOne).toHaveBeenCalledTimes(1);
-        expect(repository.findOne).toHaveBeenLastCalledWith(
-          createClient.referrerId,
-        );
-        expect(e.message).toEqual('Referrer does not exist');
-      }
-    });
-  });
+  //   it('client with referrer id not exist db', async () => {
+  //     const createClient = {
+  //       name: 'client test',
+  //       rif: 'J-30997933-8',
+  //       referrerId: 123,
+  //     };
+  //     jest.spyOn(repository, 'findOne').mockResolvedValueOnce(null);
+  //     try {
+  //       await clientsRepository.ValidateReferrerId(createClient).toPromise();
+  //     } catch (e) {
+  //       expect(e).toBeDefined();
+  //       expect(repository.findOne).toHaveBeenCalledTimes(1);
+  //       expect(repository.findOne).toHaveBeenLastCalledWith(
+  //         createClient.referrerId,
+  //       );
+  //       expect(e.message).toEqual('Referrer does not exist');
+  //     }
+  //   });
+  // });
 
   describe('get', () => {
     it('return one result', async () => {
@@ -318,11 +295,7 @@ describe('UserService', () => {
       const saved = jest
         .spyOn(repository, 'save')
         .mockResolvedValue(clientDtoSaved);
-      // clientsRepository.delete(1).subscribe({
-      //   next: x => console.log('Ok', x),
-      //   error: e => console.log('error Ok', e),
-      //   complete: () => console.log(' OK complete')
-      // })
+      // clientsRepository.delete(1).subscribe()
       const foundClient = await clientsRepository.delete(1).toPromise();
       expect(foundClient).toEqual({ message: 'success' });
       expect(find).toHaveBeenCalledTimes(1);
