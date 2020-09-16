@@ -17,6 +17,7 @@ import { ClientDto, ClientUpdateDto } from './dtos';
 import { ClientReadDto } from './dtos/client-read.dto';
 import { ClientReadExDto } from './dtos/client-read-ex.dto';
 import { MessageDto } from './dtos/message.dto';
+import { ClientReadReferrersDto } from './dtos/client-referrers.dto';
 
 @ApiTags('Client')
 @Controller('clients')
@@ -46,7 +47,7 @@ export class ClientsController {
     description: 'Get all clients actives by referrer',
     type: [ClientReadDto],
   })
-  getAllByReferrer(@Param('name') name: string): Observable<ClientReadDto[]> {
+  getAllByReferrer(@Param('name') name: string): Observable<ClientReadReferrersDto[]> {
     return this._service.getAllByReferrer(name);
   }
 

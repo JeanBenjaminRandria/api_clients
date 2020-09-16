@@ -6,6 +6,7 @@ import { map } from 'rxjs/operators';
 import { plainToClass } from 'class-transformer';
 import { ClientReadExDto } from './dtos/client-read-ex.dto';
 import { MessageDto } from './dtos/message.dto';
+import { ClientReadReferrersDto } from './dtos/client-referrers.dto';
 
 @Injectable()
 export class ClientsService {
@@ -23,10 +24,10 @@ export class ClientsService {
       .pipe(map(client => plainToClass(ClientReadDto, client)));
   }
 
-  getAllByReferrer(name: string): Observable<ClientReadDto[]> {
+  getAllByReferrer(name: string): Observable<ClientReadReferrersDto[]> {
     return this._repository
       .getAllByReferrer(name)
-      .pipe(map(client => plainToClass(ClientReadDto, client)));
+      .pipe(map(client => plainToClass(ClientReadReferrersDto, client)));
   }
 
   get(id: number): Observable<ClientReadExDto> {

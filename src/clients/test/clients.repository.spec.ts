@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { Client } from '../client.interface';
 import { ClientsRepository } from '../clients.repository';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -9,7 +9,7 @@ import {
   clientDtoSaved,
   idNoExist,
   updateRes,
-  referrer,
+  referrer, referrerDtoSaved
 } from './data-test';
 import { ClientDto, ClientUpdateDto } from '../dtos';
 import { Status } from '../status.enum';
@@ -239,6 +239,20 @@ describe('Clients Repository', () => {
         where: { status: Status.ACTIVE },
         relations: ['referrer'],
       });
+      expect(repository.find).toBeCalledTimes(1);
+    });
+  });
+
+  describe('getAllByReferrerName', () => {
+    it('return all result', async () => {
+      const name = referrer.name.slice(0, -3);
+      jest.spyOn(repository, 'find').mockResolvedValue([referrerDtoSaved]);
+      const foundClient = await clientsRepository.getAllByReferrer(name).toPromise();
+      expect(repository.find).lastCalledWith({
+        where: { name: Like(`%${name}%`) },
+        relations: ['referrers'],
+      });
+      expect(foundClient).toEqual([referrerDtoSaved]);
       expect(repository.find).toBeCalledTimes(1);
     });
   });

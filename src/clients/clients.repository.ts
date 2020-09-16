@@ -6,7 +6,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { Observable, from, of, throwError, merge, concat } from 'rxjs';
 import { map, mergeMap, filter, distinct } from 'rxjs/operators';
 import { Client } from './client.interface';
@@ -32,7 +32,7 @@ export class ClientsRepository {
 
   getAllByReferrer(name: string): Observable<Client[]> {
     return from(
-      this._repository.find({ where: { name }, relations: ['referrers'] }),
+      this._repository.find({ where: { name: Like(`%${name}%`) }, relations: ['referrers'] }),
     );
   }
 

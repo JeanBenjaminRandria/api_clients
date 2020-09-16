@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClientsService } from '../clients.service';
 import { ClientsRepository } from '../clients.repository';
-import { clientDtoSaved, clientDto } from './data-test';
+import { clientDtoSaved, clientDto, referrer, referrerDtoSaved } from './data-test';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ClientEntity } from '../client.entity';
 import { of } from 'rxjs';
@@ -9,6 +9,7 @@ import { ClientsController } from '../clients.controller';
 import { plainToClass } from 'class-transformer';
 import { ClientReadDto } from '../dtos/client-read.dto';
 import { ClientReadExDto } from '../dtos/client-read-ex.dto';
+import { ClientReadReferrersDto } from '../dtos/client-referrers.dto';
 
 describe('ClientsController', () => {
   let service: ClientsService;
@@ -24,6 +25,7 @@ describe('ClientsController', () => {
           useValue: {
             create: jest.fn,
             getAll: jest.fn(),
+            getAllByReferrer: jest.fn(),
             get: jest.fn(),
             update: jest.fn,
             delete: jest.fn,
@@ -34,6 +36,7 @@ describe('ClientsController', () => {
           useValue: {
             create: jest.fn,
             getAll: jest.fn(),
+            getAllByReferrer: jest.fn(),
             get: jest.fn(),
             update: jest.fn,
             delete: jest.fn,
@@ -83,6 +86,21 @@ describe('ClientsController', () => {
         expect(res).toEqual([plainToClass(ClientReadDto, clientDtoSaved)]);
       });
       expect(getAllSpy).toBeCalledWith();
+      expect(getAllSpy).toBeCalledTimes(1);
+    });
+  });
+
+  describe('find all Clients by referrer', () => {
+    it('getAllByReferrer ', async () => {
+      const name = referrer.name.slice(0, -3);
+      const data = plainToClass(ClientReadReferrersDto, referrerDtoSaved);
+      const getAllSpy = jest
+        .spyOn(service, 'getAllByReferrer')
+        .mockReturnValue(of([data]));
+      controller.getAllByReferrer(name).subscribe(res => {
+        expect(res).toEqual([data]);
+      });
+      expect(getAllSpy).toBeCalledWith(name);
       expect(getAllSpy).toBeCalledTimes(1);
     });
   });
