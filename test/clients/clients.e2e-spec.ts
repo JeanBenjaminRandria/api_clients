@@ -9,10 +9,10 @@ import {
   ClientDto,
   ClientReadDto,
   ClientUpdateDto,
+  ClientReadExDto,
+  ClientReadReferrersDto,
 } from '../../src/clients/dtos';
 import { Client } from '../../src/clients/client.interface';
-import { ClientReadExDto } from '../../src/clients/dtos/client-read-ex.dto';
-import { ClientReadReferrersDto } from 'src/clients/dtos/client-referrers.dto';
 
 describe('CientsController (e2e)', () => {
   let app: INestApplication;

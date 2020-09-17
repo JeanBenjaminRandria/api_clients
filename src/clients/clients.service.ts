@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { ClientsRepository } from './clients.repository';
 import { Observable } from 'rxjs';
-import { ClientDto, ClientUpdateDto, ClientReadDto } from './dtos';
+import {
+  ClientDto,
+  ClientUpdateDto,
+  ClientReadDto,
+  ClientReadExDto,
+  MessageDto,
+  ClientReadReferrersDto,
+} from './dtos';
 import { map } from 'rxjs/operators';
 import { plainToClass } from 'class-transformer';
-import { ClientReadExDto } from './dtos/client-read-ex.dto';
-import { MessageDto } from './dtos/message.dto';
-import { ClientReadReferrersDto } from './dtos/client-referrers.dto';
 
 @Injectable()
 export class ClientsService {

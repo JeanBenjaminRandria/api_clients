@@ -1,4 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { of } from 'rxjs';
+import { plainToClass } from 'class-transformer';
+
 import { ClientsService } from '../clients.service';
 import { ClientsRepository } from '../clients.repository';
 import {
@@ -7,13 +11,13 @@ import {
   referrer,
   referrerDtoSaved,
 } from './data-test';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import { ClientEntity } from '../client.entity';
-import { of } from 'rxjs';
-import { plainToClass } from 'class-transformer';
-import { ClientReadDto } from '../dtos/client-read.dto';
-import { ClientReadExDto } from '../dtos/client-read-ex.dto';
-import { ClientReadReferrersDto } from '../dtos/client-referrers.dto';
+
+import {
+  ClientReadDto,
+  ClientReadExDto,
+  ClientReadReferrersDto,
+} from '../dtos';
 
 describe('ClientsService', () => {
   let service: ClientsService;

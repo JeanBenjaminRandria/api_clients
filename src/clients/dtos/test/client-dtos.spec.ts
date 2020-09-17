@@ -2,12 +2,12 @@ import { plainToClass } from 'class-transformer';
 import { Client } from '../../client.interface';
 import { Status } from '../../status.enum';
 import { ClientMicroDto } from '..';
-import { ClientMinDto } from '../client-min.dto';
-import { ClientReadExDto } from '../client-read-ex.dto';
-import { ClientReadDto } from '../client-read.dto';
-import { ClientUpdateDto } from '../client-update.dto';
-import { ClientDto } from '../client.dtos';
-import { ClientReadReferrersDto } from '../client-referrers.dto';
+import { ClientMinDto } from '../clients/client-min.dto';
+import { ClientReadExDto } from '../clients/client-read-ex.dto';
+import { ClientReadDto } from '../clients/client-read.dto';
+import { ClientUpdateDto } from '../clients/client-update.dto';
+import { ClientDto } from '../clients/client.dtos';
+import { ClientReadReferrersDto } from '../clients/client-referrers.dto';
 
 describe('Test client dots', () => {
   const referrer: Client = {

@@ -13,11 +13,14 @@ import {
 import { ApiTags, ApiCreatedResponse } from '@nestjs/swagger';
 import { ClientsService } from './clients.service';
 import { Observable } from 'rxjs';
-import { ClientDto, ClientUpdateDto } from './dtos';
-import { ClientReadDto } from './dtos/client-read.dto';
-import { ClientReadExDto } from './dtos/client-read-ex.dto';
-import { MessageDto } from './dtos/message.dto';
-import { ClientReadReferrersDto } from './dtos/client-referrers.dto';
+import {
+  ClientDto,
+  ClientUpdateDto,
+  ClientReadDto,
+  ClientReadExDto,
+  MessageDto,
+  ClientReadReferrersDto,
+} from './dtos';
 
 @ApiTags('Client')
 @Controller('clients')

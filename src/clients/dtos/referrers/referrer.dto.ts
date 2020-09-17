@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { IsOptional } from 'class-validator';
-import { ClientMinDto } from './client-min.dto';
+import { ClientMinDto } from '../clients/client-min.dto';
 
 @Exclude()
 export class ReferrerDto {

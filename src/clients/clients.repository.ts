@@ -10,9 +10,8 @@ import { Raw, Repository } from 'typeorm';
 import { Observable, from, of, throwError, merge, concat } from 'rxjs';
 import { map, mergeMap, filter, distinct } from 'rxjs/operators';
 import { Client } from './client.interface';
-import { ClientDto, ClientUpdateDto } from './dtos';
+import { ClientDto, ClientUpdateDto, MessageDto } from './dtos';
 import { Status } from './status.enum';
-import { MessageDto } from './dtos/message.dto';
 
 @Injectable()
 export class ClientsRepository {
