@@ -28,7 +28,7 @@ describe('Clients Repository', () => {
           useValue: {
             create: jest.fn,
             save: jest.fn,
-            find: jest.fn(),
+            findAndCount: jest.fn(),
             findOne: jest.fn(),
             update: jest.fn,
             delete: jest.fn,
@@ -154,27 +154,30 @@ describe('Clients Repository', () => {
   });
 
   describe('getAll', () => {
-    it('return one result', async () => {
-      jest.spyOn(repository, 'find').mockResolvedValue([clientDtoSaved]);
+    it('return all clients', async () => {
+      jest.spyOn(repository, 'findAndCount').mockResolvedValue([[clientDtoSaved], 1]);
       const foundClient = await clientsRepository.getAll().toPromise();
       expect(foundClient).toEqual([clientDtoSaved]);
-      expect(repository.find).lastCalledWith({
+      expect(repository.findAndCount).lastCalledWith({
         where: { status: Status.ACTIVE },
-        relations: ['referrer'],
+        order: { name: "DESC" },
+        take: 10,
+        skip: 0,
+        relations: ['referrer']
       });
-      expect(repository.find).toBeCalledTimes(1);
+      expect(repository.findAndCount).toBeCalledTimes(1);
     });
   });
 
   describe('getAllByReferrerName', () => {
-    it('return all result', async () => {
+    it('return all referrers result', async () => {
       const name = referrer.name.slice(0, -3);
-      jest.spyOn(repository, 'find').mockResolvedValue([referrerDtoSaved]);
+      jest.spyOn(repository, 'findAndCount').mockResolvedValue([[referrerDtoSaved], 1]);
       const foundClient = await clientsRepository
         .getAllByReferrer(name)
         .toPromise();
       expect(foundClient).toEqual([referrerDtoSaved]);
-      expect(repository.find).toBeCalledTimes(1);
+      expect(repository.findAndCount).toBeCalledTimes(1);
     });
   });
 
