@@ -16,3 +16,8 @@ export class PaginationInDto {
     skip: number;
 
 }
+
+export const paginationIntDefault: PaginationInDto = {
+    take: 10, 
+    skip: 0
+}

@@ -8,10 +8,11 @@ import {
 } from '@nestjs/common';
 import { Raw, Repository } from 'typeorm';
 import { Observable, from, of, throwError, merge, concat } from 'rxjs';
-import { map, mergeMap, filter, distinct } from 'rxjs/operators';
+import { map, mergeMap, filter, distinct, tap } from 'rxjs/operators';
 import { Client } from './client.interface';
 import { ClientDto, ClientUpdateDto, MessageDto } from './dtos';
 import { Status } from './status.enum';
+import { PaginationInDto, paginationIntDefault } from './dtos/paginations/pagination-in.dto';
 
 @Injectable()
 export class ClientsRepository {
@@ -20,22 +21,29 @@ export class ClientsRepository {
     private readonly _repository: Repository<ClientEntity>,
   ) {}
 
-  getAll(): Observable<Client[]> {
+  getAll(pagination: PaginationInDto = paginationIntDefault): Observable<Client[]> {
     return from(
-      this._repository.find({
+      this._repository.findAndCount({
         where: { status: Status.ACTIVE },
-        relations: ['referrer'],
+        order: { name: "DESC" },
+        take: pagination.take,
+        skip: pagination.skip,
+        relations: ['referrer']
       }),
-    );
+    )
+    .pipe(map(value => value[0]));
   }
 
-  getAllByReferrer(name: string): Observable<Client[]> {
+  getAllByReferrer(name: string, pagination: PaginationInDto = paginationIntDefault): Observable<Client[]> {
     return from(
-      this._repository.find({
+      this._repository.findAndCount({
         where: { name: Raw(alias => `LOWER(${alias}) like '%${name}%'`) },
-        relations: ['referrers'],
+        take: pagination.take,
+        skip: pagination.skip,
+        relations: ['referrers']
       }),
-    );
+    )
+    .pipe(map(value => value[0]));
   }
 
   get(id: number): Observable<Client> {
