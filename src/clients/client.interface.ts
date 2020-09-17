@@ -4,6 +4,7 @@ export interface Client {
   rif: string;
   status: string;
   referrer?: Client;
+  referrers?: Client[];
   referrerId?: number;
   createdAt: Date;
   updatedAt: Date;

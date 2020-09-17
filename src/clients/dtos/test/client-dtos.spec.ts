@@ -7,6 +7,7 @@ import { ClientReadExDto } from '../client-read-ex.dto';
 import { ClientReadDto } from '../client-read.dto';
 import { ClientUpdateDto } from '../client-update.dto';
 import { ClientDto } from '../client.dtos';
+import { ClientReadReferrersDto } from '../client-referrers.dto';
 
 describe('Test client dots', () => {
   const referrer: Client = {
@@ -28,6 +29,8 @@ describe('Test client dots', () => {
     createdAt: new Date(),
     updatedAt: new Date(),
   };
+
+  referrer.referrers = [client];
 
   it('Client Micro Dto', () => {
     const expectDto: ClientMicroDto = {
@@ -76,6 +79,23 @@ describe('Test client dots', () => {
       },
     };
     const microDto = plainToClass(ClientReadExDto, client);
+    expect(microDto).toEqual(expectDto);
+  });
+
+  it('Client referrers Dto', () => {
+    const expectDto: ClientReadReferrersDto = {
+      id: referrer.id,
+      name: referrer.name,
+      rif: referrer.rif,
+      referrers: [
+        {
+          id: client.id,
+          name: client.name,
+          rif: client.rif,
+        },
+      ],
+    };
+    const microDto = plainToClass(ClientReadReferrersDto, referrer);
     expect(microDto).toEqual(expectDto);
   });
 

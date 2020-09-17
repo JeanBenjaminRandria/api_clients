@@ -2,12 +2,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ClientEntity } from './client.entity';
 import {
   BadRequestException,
+  HttpException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { Observable, from, of, throwError, merge } from 'rxjs';
-import { map, mergeMap, filter, isEmpty } from 'rxjs/operators';
+import { Raw, Repository } from 'typeorm';
+import { Observable, from, of, throwError, merge, concat } from 'rxjs';
+import { map, mergeMap, filter, distinct } from 'rxjs/operators';
 import { Client } from './client.interface';
 import { ClientDto, ClientUpdateDto } from './dtos';
 import { Status } from './status.enum';
@@ -29,67 +30,63 @@ export class ClientsRepository {
     );
   }
 
-  get(id: number): Observable<Client> {
-    const find = from(
-      this._repository.findOne({ where: { id }, relations: ['referrer'] }),
-    );
-    return merge(
-      find
-        .pipe(filter(cli => cli === undefined))
-        .pipe(
-          mergeMap(() =>
-            throwError(new NotFoundException(`Client has not been found`)),
-          ),
-        ),
-      find.pipe(filter(cli => cli !== undefined)),
+  getAllByReferrer(name: string): Observable<Client[]> {
+    return from(
+      this._repository.find({
+        where: { name: Raw(alias => `LOWER(${alias}) like '%${name}%'`) },
+        relations: ['referrers'],
+      }),
     );
   }
 
-  ValidateReferrerId(client: ClientDto): Observable<ClientEntity> {
+  get(id: number): Observable<Client> {
+    return this.validate(
+      this.findOne(id),
+      undefined,
+      new NotFoundException(`Client has not been found`),
+    );
+  }
+
+  private findOne(
+    id: number,
+    isRelation = true,
+    relations: string[] = ['referrer'],
+  ): Observable<Client> {
+    return isRelation
+      ? from(this._repository.findOne({ where: { id }, relations }))
+      : from(this._repository.findOne({ where: { id } }));
+  }
+
+  private ValidateReferrerId(client: ClientDto): Observable<ClientEntity> {
     return of(client)
       .pipe(map(cli => cli.referrerId))
       .pipe(filter(id => id !== undefined))
-      .pipe(mergeMap(id => this.validateDontExistIdDb(id)))
-      .pipe(filter(isEmpty => isEmpty === false))
       .pipe(
-        mergeMap(() =>
-          throwError(new BadRequestException('Referrer does not exist')),
+        mergeMap(id =>
+          this.validate(
+            from(this.findOne(id, false)),
+            undefined,
+            new BadRequestException('Referrer does not exist'),
+          ),
         ),
       );
   }
 
-  validateDontExistIdDb(id: number): Observable<boolean> {
-    return of(id)
-      .pipe(mergeMap(id => this._repository.findOne(id)))
-      .pipe(filter(cli => cli === undefined))
-      .pipe(isEmpty());
-  }
-
-  validateDontExistRifDb(rif: string): Observable<boolean> {
-    return of(rif)
-      .pipe(mergeMap(rif => this._repository.findOne({ rif })))
-      .pipe(filter(cli => cli !== undefined))
-      .pipe(isEmpty());
-  }
-
-  validateRif(client: ClientDto): Observable<any> {
-    return of(client.rif)
-      .pipe(mergeMap(rif => this.validateDontExistRifDb(rif)))
-      .pipe(filter(isEmpty => isEmpty === false))
-      .pipe(
-        mergeMap(() =>
-          throwError(new BadRequestException('Client already exist')),
-        ),
-      );
+  private validateRif(client: ClientDto): Observable<any> {
+    return this.validate(
+      from(this._repository.findOne({ rif: client.rif })),
+      new BadRequestException('Client already exist'),
+      undefined,
+    );
   }
 
   create(clientProspect: ClientDto): Observable<any> {
-    return merge(
+    return concat(
       this.ValidateReferrerId(clientProspect),
       this.validateRif(clientProspect),
     )
-      .pipe(isEmpty())
-      .pipe(filter(val => val === true))
+      .pipe(distinct())
+      .pipe(filter(val => val === undefined))
       .pipe(mergeMap(() => this.saveClient(clientProspect)));
   }
 
@@ -101,13 +98,33 @@ export class ClientsRepository {
   }
 
   update(id: number, clientProspect: ClientUpdateDto): Observable<Client> {
-    return this.get(id)
+    return this.validate(
+      this.findOne(id, false),
+      undefined,
+      new NotFoundException('Client has not been found'),
+    )
       .pipe(mergeMap(() => this._repository.update(id, clientProspect)))
       .pipe(mergeMap(() => this.get(id)));
   }
 
+  private validate<T>(
+    obs: Observable<T>,
+    errorFull?: HttpException,
+    errorEmpty?: HttpException,
+  ): Observable<any> {
+    const exeption$ = errorFull
+      ? throwError(errorFull)
+      : throwError(errorEmpty);
+    const empty = obs.pipe(filter(x => x === undefined));
+    const full = obs.pipe(filter(x => x !== undefined));
+    return merge(
+      errorFull ? full.pipe(mergeMap(() => exeption$)) : full,
+      errorEmpty ? empty.pipe(mergeMap(() => exeption$)) : empty,
+    );
+  }
+
   delete(id: number): Observable<MessageDto> {
-    const find = from(this._repository.findOne(id))
+    const find = this.findOne(id, false)
       .pipe(filter(cli => cli !== undefined))
       .pipe(
         map(cli => {
