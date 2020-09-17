@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { Like, Repository } from 'typeorm';
+import { FindOperator, Like, Raw, Repository } from 'typeorm';
 import { Client } from '../client.interface';
 import { ClientsRepository } from '../clients.repository';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -9,7 +9,8 @@ import {
   clientDtoSaved,
   idNoExist,
   updateRes,
-  referrer, referrerDtoSaved
+  referrer,
+  referrerDtoSaved,
 } from './data-test';
 import { ClientDto, ClientUpdateDto } from '../dtos';
 import { Status } from '../status.enum';
@@ -127,84 +128,6 @@ describe('Clients Repository', () => {
     });
   });
 
-  // describe(' validate rif client', () => {
-  //   it('Rif dont exist', async () => {
-  //     const createClient = {
-  //       name: 'client test',
-  //       rif: 'J-30997933-4',
-  //     };
-  //     jest.spyOn(repository, 'findOne').mockResolvedValueOnce(undefined);
-  //     await clientsRepository.validateRif(createClient).toPromise();
-  //     expect(repository.findOne).toHaveBeenCalledTimes(1);
-  //     expect(repository.findOne).toHaveBeenLastCalledWith({
-  //       rif: createClient.rif,
-  //     });
-  //   });
-
-  //   it('Rif exist', async () => {
-  //     const createClient = {
-  //       name: 'client test',
-  //       rif: 'J-30997933-5',
-  //     };
-  //     jest.spyOn(repository, 'findOne').mockResolvedValueOnce(clientDtoSaved);
-  //     try {
-  //       await clientsRepository.validateRif(createClient).toPromise();
-  //     } catch (e) {
-  //       expect(repository.findOne).toHaveBeenCalledTimes(1);
-  //       expect(repository.findOne).toHaveBeenLastCalledWith({
-  //         rif: createClient.rif,
-  //       });
-  //       expect(e).toBeDefined();
-  //       expect(e.message).toEqual('Client already exist');
-  //     }
-  //   });
-  // });
-
-  // describe('validate referrer', () => {
-  //   it('client without referrer id', () => {
-  //     const createClient = {
-  //       name: 'client test',
-  //       rif: 'J-30997933-6',
-  //     };
-  //     jest.spyOn(repository, 'findOne');
-  //     clientsRepository.ValidateReferrerId(createClient).toPromise();
-  //     expect(repository.findOne).not.toHaveBeenCalled();
-  //   });
-
-  //   it('client with referrer id exist db', async () => {
-  //     const createClient = {
-  //       name: 'client test',
-  //       rif: 'J-30997933-7',
-  //       referrerId: 123,
-  //     };
-  //     jest.spyOn(repository, 'findOne').mockResolvedValueOnce(clientDtoSaved);
-  //     await clientsRepository.ValidateReferrerId(createClient).toPromise();
-  //     expect(repository.findOne).toHaveBeenCalledTimes(1);
-  //     expect(repository.findOne).toHaveBeenLastCalledWith(
-  //       { "where": { "id": createClient.referrerId } },
-  //     );
-  //   });
-
-  //   it('client with referrer id not exist db', async () => {
-  //     const createClient = {
-  //       name: 'client test',
-  //       rif: 'J-30997933-8',
-  //       referrerId: 123,
-  //     };
-  //     jest.spyOn(repository, 'findOne').mockResolvedValueOnce(null);
-  //     try {
-  //       await clientsRepository.ValidateReferrerId(createClient).toPromise();
-  //     } catch (e) {
-  //       expect(e).toBeDefined();
-  //       expect(repository.findOne).toHaveBeenCalledTimes(1);
-  //       expect(repository.findOne).toHaveBeenLastCalledWith(
-  //         createClient.referrerId,
-  //       );
-  //       expect(e.message).toEqual('Referrer does not exist');
-  //     }
-  //   });
-  // });
-
   describe('get', () => {
     it('return one result', async () => {
       jest.spyOn(repository, 'findOne').mockResolvedValue(clientDtoSaved);
@@ -247,11 +170,9 @@ describe('Clients Repository', () => {
     it('return all result', async () => {
       const name = referrer.name.slice(0, -3);
       jest.spyOn(repository, 'find').mockResolvedValue([referrerDtoSaved]);
-      const foundClient = await clientsRepository.getAllByReferrer(name).toPromise();
-      expect(repository.find).lastCalledWith({
-        where: { name: Like(`%${name}%`) },
-        relations: ['referrers'],
-      });
+      const foundClient = await clientsRepository
+        .getAllByReferrer(name)
+        .toPromise();
       expect(foundClient).toEqual([referrerDtoSaved]);
       expect(repository.find).toBeCalledTimes(1);
     });

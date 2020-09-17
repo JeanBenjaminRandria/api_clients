@@ -17,8 +17,6 @@ export const clientDto: ClientDto = {
   referrerId: referrer.id,
 };
 
-
-
 export const clientDtoSaved: Client = {
   id: 123,
   createdAt: new Date(),
@@ -36,7 +34,6 @@ export const referrerDtoSaved: Client = {
   referrers: [{ ...clientDtoSaved }],
   status: Status.ACTIVE,
 };
-
 
 export const idNoExist = 1000;
 

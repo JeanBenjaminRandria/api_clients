@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { Repository } from 'typeorm';
@@ -12,6 +12,7 @@ import {
 } from '../../src/clients/dtos';
 import { Client } from '../../src/clients/client.interface';
 import { ClientReadExDto } from '../../src/clients/dtos/client-read-ex.dto';
+import { ClientReadReferrersDto } from 'src/clients/dtos/client-referrers.dto';
 
 describe('CientsController (e2e)', () => {
   let app: INestApplication;
@@ -37,6 +38,12 @@ describe('CientsController (e2e)', () => {
     await clientRepository.query(
       'TRUNCATE TABLE clients RESTART IDENTITY CASCADE',
     );
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+      }),
+    );
     await app.init();
 
     client = await clientRepository.save(clientCreate);
@@ -58,6 +65,34 @@ describe('CientsController (e2e)', () => {
         expect(clients.length).toBe(2);
       });
     done();
+  });
+
+  describe('Get Client By Refferer', () => {
+    it('/client/referrer/:name (GET)', async done => {
+      await request(app.getHttpServer())
+        .get(`/clients/referrer/${client.name}`)
+        .expect(200)
+        .expect(({ body }) => {
+          const client1: ClientReadReferrersDto = body[0];
+          expect(body.length).toBeGreaterThan(0);
+          expect(client1.referrers.length).toBeGreaterThan(0);
+        });
+
+      done();
+    });
+
+    it('/client/referrer/:name (GET)', async done => {
+      const name = client.name.slice(0, -3);
+      await request(app.getHttpServer())
+        .get(`/clients/referrer/${name}`)
+        .expect(200)
+        .expect(({ body }) => {
+          const client1: ClientReadReferrersDto = body[0];
+          expect(body.length).toBeGreaterThan(0);
+          expect(client1.referrers.length).toBeGreaterThan(0);
+        });
+      done();
+    });
   });
 
   describe('/clients/:id (GET)', () => {

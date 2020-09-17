@@ -47,8 +47,10 @@ export class ClientsController {
     description: 'Get all clients actives by referrer',
     type: [ClientReadDto],
   })
-  getAllByReferrer(@Param('name') name: string): Observable<ClientReadReferrersDto[]> {
-    return this._service.getAllByReferrer(name);
+  getAllByReferrer(
+    @Param('name') name: string,
+  ): Observable<ClientReadReferrersDto[]> {
+    return this._service.getAllByReferrer(name.toLocaleLowerCase());
   }
 
   @Get(':id')

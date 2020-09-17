@@ -1,7 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ClientsService } from '../clients.service';
 import { ClientsRepository } from '../clients.repository';
-import { clientDtoSaved, clientDto, referrer, referrerDtoSaved } from './data-test';
+import {
+  clientDtoSaved,
+  clientDto,
+  referrer,
+  referrerDtoSaved,
+} from './data-test';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ClientEntity } from '../client.entity';
 import { of } from 'rxjs';
@@ -84,7 +89,9 @@ describe('ClientsService', () => {
         .spyOn(repository, 'getAllByReferrer')
         .mockReturnValue(of([referrerDtoSaved]));
       service.getAllByReferrer(name).subscribe(res => {
-        expect(res).toEqual([plainToClass(ClientReadReferrersDto, referrerDtoSaved)]);
+        expect(res).toEqual([
+          plainToClass(ClientReadReferrersDto, referrerDtoSaved),
+        ]);
       });
       expect(getAllSpy).toBeCalledWith(name);
       expect(getAllSpy).toBeCalledTimes(1);

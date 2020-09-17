@@ -17,7 +17,6 @@ describe('Test client dots', () => {
     status: Status.ACTIVE,
     createdAt: new Date(),
     updatedAt: new Date(),
-
   };
 
   const client: Client = {
@@ -88,11 +87,13 @@ describe('Test client dots', () => {
       id: referrer.id,
       name: referrer.name,
       rif: referrer.rif,
-      referrers: [{
-        id: client.id,
-        name: client.name,
-        rif: client.rif
-      }],
+      referrers: [
+        {
+          id: client.id,
+          name: client.name,
+          rif: client.rif,
+        },
+      ],
     };
     const microDto = plainToClass(ClientReadReferrersDto, referrer);
     expect(microDto).toEqual(expectDto);
