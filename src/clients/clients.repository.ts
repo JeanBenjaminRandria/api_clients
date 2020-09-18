@@ -10,15 +10,15 @@ import { Raw, Repository } from 'typeorm';
 import { Observable, from, of, throwError, merge, concat } from 'rxjs';
 import { map, mergeMap, filter, distinct, tap } from 'rxjs/operators';
 import { Client } from './client.interface';
-import { ClientDto, ClientReadDto, ClientReadReferrersDto, ClientUpdateDto, MessageDto } from './dtos';
-import { Status } from './status.enum';
 import {
+  ClientDto,
+  ClientUpdateDto,
+  MessageDto,
+  PaginationClientsDto,
   PaginationInDto,
   paginationIntDefault,
-} from './dtos/paginations/pagination-in.dto';
-import { plainToClass } from 'class-transformer';
-import { PaginationClientsDto } from './dtos/paginations/pagination-clients.dto';
-import { PaginationOutReferrersDto } from './dtos/paginations/pagination-out-referrer.dto';
+} from './dtos';
+import { Status } from './status.enum';
 
 @Injectable()
 export class ClientsRepository {
@@ -38,26 +38,31 @@ export class ClientsRepository {
         skip: pagination.skip,
         relations: ['referrer'],
       }),
-    )
-    .pipe(
-      map(value => {return {count: value[1], clients: value[0]}}
-      ));
+    ).pipe(
+      map(value => {
+        return { count: value[1], clients: value[0] };
+      }),
+    );
   }
 
   getAllByReferrer(
     name: string,
     pagination: PaginationInDto = paginationIntDefault,
   ): Observable<PaginationClientsDto> {
+    name = name.toLowerCase();
     return from(
       this._repository.findAndCount({
         where: { name: Raw(alias => `LOWER(${alias}) like '%${name}%'`) },
         take: pagination.take,
         skip: pagination.skip,
+        order: { name: 'ASC' },
         relations: ['referrers'],
       }),
     ).pipe(
-      map(value => {return {count: value[1], clients: value[0]}}
-      ));
+      map(value => {
+        return { count: value[1], clients: value[0] };
+      }),
+    );
   }
 
   get(id: number): Observable<Client> {

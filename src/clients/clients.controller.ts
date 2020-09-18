@@ -10,7 +10,7 @@ import {
   HttpStatus,
   Patch,
 } from '@nestjs/common';
-import { ApiTags, ApiCreatedResponse } from '@nestjs/swagger';
+import { ApiTags, ApiCreatedResponse, ApiParam } from '@nestjs/swagger';
 import { ClientsService } from './clients.service';
 import { Observable } from 'rxjs';
 import {
@@ -19,7 +19,8 @@ import {
   ClientReadDto,
   ClientReadExDto,
   MessageDto,
-  PaginationClientsReadDto, PaginationOutReferrersDto, PaginationInDto
+  PaginationClientsReadDto,
+  PaginationOutReferrersDto
 } from './dtos';
 
 @ApiTags('Client')
@@ -36,27 +37,34 @@ export class ClientsController {
     return this._service.create(clientProspec);
   }
 
-  @Get()
+  @ApiParam({ name: 'take', required: false })
+  @ApiParam({ name: 'skip', required: false })
+  @Get('all/:take?/:skip?')
   @ApiCreatedResponse({
     description: 'Get all clients actives',
-    type: [ClientReadDto],
+    type: [PaginationClientsReadDto],
   })
   getAllClients(
-    @Param('pagination') pagination?: PaginationInDto
+    @Param('take') take?: number,
+    @Param('skip') skip?: number,
   ): Observable<PaginationClientsReadDto> {
-    return this._service.getAll(pagination);
+    return this._service.getAll({ take, skip });
   }
 
-  @Get('/referrer/:name')
+  @Get('/referrer/:name/:take?/:skip?')
+  @ApiParam({ name: 'take', required: false })
+  @ApiParam({ name: 'skip', required: false })
+  @ApiParam({ name: 'name', required: true })
   @ApiCreatedResponse({
     description: 'Get all clients actives by referrer',
-    type: [ClientReadDto],
+    type: [PaginationOutReferrersDto],
   })
   getAllByReferrer(
     @Param('name') name: string,
-    @Param('pagination') pagination?: PaginationInDto
+    @Param('take') take?: number,
+    @Param('skip') skip?: number,
   ): Observable<PaginationOutReferrersDto> {
-    return this._service.getAllByReferrer(name, pagination);
+    return this._service.getAllByReferrer(name, { take, skip });
   }
 
   @Get(':id')

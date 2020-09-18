@@ -1,13 +1,12 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
-import { IsOptional } from 'class-validator';
 import { ClientMinDto } from '../clients/client-min.dto';
 
 @Exclude()
 export class ReferrersDto {
-  @ApiPropertyOptional()
+  @ApiProperty()
   @Expose()
-  @IsOptional()
+  // @IsOptional()
   @Type(() => ClientMinDto)
-  referrers?: ClientMinDto[];
+  referrers: ClientMinDto[];
 }

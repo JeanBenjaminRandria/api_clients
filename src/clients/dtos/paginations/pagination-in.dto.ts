@@ -1,18 +1,20 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
-import { IsNumber } from 'class-validator';
+import { IsNumber, IsOptional } from 'class-validator';
 
 @Exclude()
 export class PaginationInDto {
-  @ApiProperty()
+  @ApiPropertyOptional()
   @Expose()
   @IsNumber()
-  take: number;
+  @IsOptional()
+  take?: number;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   @Expose()
   @IsNumber()
-  skip: number;
+  @IsOptional()
+  skip?: number;
 }
 
 export const paginationIntDefault: PaginationInDto = {

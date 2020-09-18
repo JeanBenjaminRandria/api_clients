@@ -9,13 +9,16 @@ import {
   ClientReadDto,
   ClientReadExDto,
   MessageDto,
-  ClientReadReferrersDto, PaginationClientsReadDto, PaginationOutReferrersDto, PaginationClientsDto, PaginationInDto
+  ClientReadReferrersDto,
+  PaginationClientsReadDto,
+  PaginationOutReferrersDto,
+  PaginationClientsDto,
+  PaginationInDto,
 } from './dtos';
-
 
 @Injectable()
 export class ClientsService {
-  constructor(private readonly _repository: ClientsRepository) { }
+  constructor(private readonly _repository: ClientsRepository) {}
 
   create(clientProspec: ClientDto): Observable<ClientReadDto> {
     return this._repository
@@ -24,21 +27,30 @@ export class ClientsService {
   }
 
   getAll(pagination?: PaginationInDto): Observable<PaginationClientsReadDto> {
-    return this._repository
-      .getAll(pagination)
-      .pipe(
-        map(
-          (value: PaginationClientsDto) => {
-            return { count: value.count, clients: value.clients.map(cli => plainToClass(ClientReadDto, cli)) }
-          }))
+    return this._repository.getAll(pagination).pipe(
+      map((value: PaginationClientsDto) => {
+        return {
+          count: value.count,
+          clients: value.clients.map(cli => plainToClass(ClientReadDto, cli)),
+        };
+      }),
+    );
   }
 
-  getAllByReferrer(name: string, pagination?: PaginationInDto): Observable<PaginationOutReferrersDto> {
-    return this._repository
-      .getAllByReferrer(name, pagination)
-      .pipe(map((value: PaginationClientsDto) => {
-        return { count: value.count, clients: value.clients.map(cli => plainToClass(ClientReadReferrersDto, cli)) }
-      }))
+  getAllByReferrer(
+    name: string,
+    pagination?: PaginationInDto,
+  ): Observable<PaginationOutReferrersDto> {
+    return this._repository.getAllByReferrer(name, pagination).pipe(
+      map((value: PaginationClientsDto) => {
+        return {
+          count: value.count,
+          clients: value.clients.map(cli =>
+            plainToClass(ClientReadReferrersDto, cli),
+          ),
+        };
+      }),
+    );
   }
 
   get(id: number): Observable<ClientReadExDto> {

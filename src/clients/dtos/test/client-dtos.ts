@@ -35,9 +35,8 @@ describe('Test client dots', () => {
 
   const pagination = {
     count: 1,
-    clients: [client]
-  }
-  
+    clients: [client],
+  };
 
   it('Client Micro Dto', () => {
     const expectDto: ClientMicroDto = {
@@ -127,7 +126,6 @@ describe('Test client dots', () => {
   });
 
   it('Pagination Dto', () => {
-
     const paginationDto = plainToClass(PaginationClientsDto, pagination);
     expect(paginationDto.clients[0]).toEqual(client);
     expect(pagination.count).toEqual(paginationDto.count);

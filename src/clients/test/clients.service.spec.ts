@@ -75,9 +75,12 @@ describe('ClientsService', () => {
     it('getAll ', async () => {
       const getAllSpy = jest
         .spyOn(repository, 'getAll')
-        .mockReturnValue(of({count: 1, clients:[clientDtoSaved]}));
+        .mockReturnValue(of({ count: 1, clients: [clientDtoSaved] }));
       service.getAll().subscribe(res => {
-        expect(res).toEqual({count: 1, clients:[plainToClass(ClientReadDto, clientDtoSaved)]});
+        expect(res).toEqual({
+          count: 1,
+          clients: [plainToClass(ClientReadDto, clientDtoSaved)],
+        });
       });
       expect(getAllSpy).toHaveBeenCalled();
       expect(getAllSpy).toBeCalledTimes(1);
@@ -89,11 +92,12 @@ describe('ClientsService', () => {
       const name = referrer.name.slice(0, -3);
       const getAllSpy = jest
         .spyOn(repository, 'getAllByReferrer')
-        .mockReturnValue(of({count: 1, clients:[referrerDtoSaved]}));
+        .mockReturnValue(of({ count: 1, clients: [referrerDtoSaved] }));
       service.getAllByReferrer(name).subscribe(res => {
-        expect(res).toEqual({count: 1, clients:[
-          plainToClass(ClientReadReferrersDto, referrerDtoSaved),
-        ]});
+        expect(res).toEqual({
+          count: 1,
+          clients: [plainToClass(ClientReadReferrersDto, referrerDtoSaved)],
+        });
       });
       expect(getAllSpy).toBeCalledWith(name, undefined);
       expect(getAllSpy).toBeCalledTimes(1);

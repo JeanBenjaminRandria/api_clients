@@ -12,9 +12,12 @@ import {
   referrer,
   referrerDtoSaved,
 } from './data-test';
-import { ClientDto, ClientReadDto, ClientReadReferrersDto, ClientUpdateDto, PaginationClientsDto, PaginationOutReferrersDto } from '../dtos';
+import {
+  ClientDto,
+  ClientUpdateDto,
+  PaginationClientsDto,
+} from '../dtos';
 import { Status } from '../status.enum';
-import { plainToClass } from 'class-transformer';
 
 describe('Clients Repository', () => {
   let repository: Repository<Client>;
@@ -159,9 +162,11 @@ describe('Clients Repository', () => {
       jest
         .spyOn(repository, 'findAndCount')
         .mockResolvedValue([[clientDtoSaved], 1]);
-      const res: PaginationClientsDto = await clientsRepository.getAll().toPromise();
+      const res: PaginationClientsDto = await clientsRepository
+        .getAll()
+        .toPromise();
       expect(res.count).toBe(1);
-      expect(res.clients).toEqual([ clientDtoSaved]);
+      expect(res.clients).toEqual([clientDtoSaved]);
       expect(repository.findAndCount).lastCalledWith({
         where: { status: Status.ACTIVE },
         order: { name: 'DESC' },
@@ -179,11 +184,11 @@ describe('Clients Repository', () => {
       jest
         .spyOn(repository, 'findAndCount')
         .mockResolvedValue([[referrerDtoSaved], 1]);
-        const res: PaginationClientsDto = await clientsRepository
+      const res: PaginationClientsDto = await clientsRepository
         .getAllByReferrer(name)
         .toPromise();
-        expect(res.count).toBe(1);
-        expect(res.clients).toEqual([referrerDtoSaved]);
+      expect(res.count).toBe(1);
+      expect(res.clients).toEqual([referrerDtoSaved]);
       expect(repository.findAndCount).toBeCalledTimes(1);
     });
   });
