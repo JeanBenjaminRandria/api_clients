@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Type } from 'class-transformer';
 import { IsNumber } from 'class-validator';
-import { ClientReadReferrersDto } from '../clients/client-referrers.dto';
+import { ClientEntity } from '../../client.entity';
+import { Client } from '../../client.interface';
 
 @Exclude()
-export class PaginationOutReferrersDto {
+export class PaginationClientsDto {
   @ApiProperty()
   @Expose()
   @IsNumber()
@@ -12,6 +13,6 @@ export class PaginationOutReferrersDto {
 
   @ApiProperty()
   @Expose()
-  @Type(() => ClientReadReferrersDto)
-  clients: ClientReadReferrersDto[];
+  @Type(() => ClientEntity)
+  clients: ClientEntity[];
 }

@@ -10,9 +10,15 @@ import { Raw, Repository } from 'typeorm';
 import { Observable, from, of, throwError, merge, concat } from 'rxjs';
 import { map, mergeMap, filter, distinct, tap } from 'rxjs/operators';
 import { Client } from './client.interface';
-import { ClientDto, ClientUpdateDto, MessageDto } from './dtos';
+import { ClientDto, ClientReadDto, ClientReadReferrersDto, ClientUpdateDto, MessageDto } from './dtos';
 import { Status } from './status.enum';
-import { PaginationInDto, paginationIntDefault } from './dtos/paginations/pagination-in.dto';
+import {
+  PaginationInDto,
+  paginationIntDefault,
+} from './dtos/paginations/pagination-in.dto';
+import { plainToClass } from 'class-transformer';
+import { PaginationClientsDto } from './dtos/paginations/pagination-clients.dto';
+import { PaginationOutReferrersDto } from './dtos/paginations/pagination-out-referrer.dto';
 
 @Injectable()
 export class ClientsRepository {
@@ -21,29 +27,37 @@ export class ClientsRepository {
     private readonly _repository: Repository<ClientEntity>,
   ) {}
 
-  getAll(pagination: PaginationInDto = paginationIntDefault): Observable<Client[]> {
+  getAll(
+    pagination: PaginationInDto = paginationIntDefault,
+  ): Observable<PaginationClientsDto> {
     return from(
       this._repository.findAndCount({
         where: { status: Status.ACTIVE },
-        order: { name: "DESC" },
+        order: { name: 'DESC' },
         take: pagination.take,
         skip: pagination.skip,
-        relations: ['referrer']
+        relations: ['referrer'],
       }),
     )
-    .pipe(map(value => value[0]));
+    .pipe(
+      map(value => {return {count: value[1], clients: value[0]}}
+      ));
   }
 
-  getAllByReferrer(name: string, pagination: PaginationInDto = paginationIntDefault): Observable<Client[]> {
+  getAllByReferrer(
+    name: string,
+    pagination: PaginationInDto = paginationIntDefault,
+  ): Observable<PaginationClientsDto> {
     return from(
       this._repository.findAndCount({
         where: { name: Raw(alias => `LOWER(${alias}) like '%${name}%'`) },
         take: pagination.take,
         skip: pagination.skip,
-        relations: ['referrers']
+        relations: ['referrers'],
       }),
-    )
-    .pipe(map(value => value[0]));
+    ).pipe(
+      map(value => {return {count: value[1], clients: value[0]}}
+      ));
   }
 
   get(id: number): Observable<Client> {

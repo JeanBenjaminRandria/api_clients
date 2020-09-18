@@ -12,8 +12,9 @@ import {
   referrer,
   referrerDtoSaved,
 } from './data-test';
-import { ClientDto, ClientUpdateDto } from '../dtos';
+import { ClientDto, ClientReadDto, ClientReadReferrersDto, ClientUpdateDto, PaginationClientsDto, PaginationOutReferrersDto } from '../dtos';
 import { Status } from '../status.enum';
+import { plainToClass } from 'class-transformer';
 
 describe('Clients Repository', () => {
   let repository: Repository<Client>;
@@ -155,15 +156,18 @@ describe('Clients Repository', () => {
 
   describe('getAll', () => {
     it('return all clients', async () => {
-      jest.spyOn(repository, 'findAndCount').mockResolvedValue([[clientDtoSaved], 1]);
-      const foundClient = await clientsRepository.getAll().toPromise();
-      expect(foundClient).toEqual([clientDtoSaved]);
+      jest
+        .spyOn(repository, 'findAndCount')
+        .mockResolvedValue([[clientDtoSaved], 1]);
+      const res: PaginationClientsDto = await clientsRepository.getAll().toPromise();
+      expect(res.count).toBe(1);
+      expect(res.clients).toEqual([ clientDtoSaved]);
       expect(repository.findAndCount).lastCalledWith({
         where: { status: Status.ACTIVE },
-        order: { name: "DESC" },
+        order: { name: 'DESC' },
         take: 10,
         skip: 0,
-        relations: ['referrer']
+        relations: ['referrer'],
       });
       expect(repository.findAndCount).toBeCalledTimes(1);
     });
@@ -172,11 +176,14 @@ describe('Clients Repository', () => {
   describe('getAllByReferrerName', () => {
     it('return all referrers result', async () => {
       const name = referrer.name.slice(0, -3);
-      jest.spyOn(repository, 'findAndCount').mockResolvedValue([[referrerDtoSaved], 1]);
-      const foundClient = await clientsRepository
+      jest
+        .spyOn(repository, 'findAndCount')
+        .mockResolvedValue([[referrerDtoSaved], 1]);
+        const res: PaginationClientsDto = await clientsRepository
         .getAllByReferrer(name)
         .toPromise();
-      expect(foundClient).toEqual([referrerDtoSaved]);
+        expect(res.count).toBe(1);
+        expect(res.clients).toEqual([referrerDtoSaved]);
       expect(repository.findAndCount).toBeCalledTimes(1);
     });
   });

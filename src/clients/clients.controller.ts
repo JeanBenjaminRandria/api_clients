@@ -19,7 +19,7 @@ import {
   ClientReadDto,
   ClientReadExDto,
   MessageDto,
-  ClientReadReferrersDto,
+  PaginationClientsReadDto, PaginationOutReferrersDto, PaginationInDto
 } from './dtos';
 
 @ApiTags('Client')
@@ -41,8 +41,10 @@ export class ClientsController {
     description: 'Get all clients actives',
     type: [ClientReadDto],
   })
-  getAllClients(): Observable<ClientReadDto[]> {
-    return this._service.getAll();
+  getAllClients(
+    @Param('pagination') pagination?: PaginationInDto
+  ): Observable<PaginationClientsReadDto> {
+    return this._service.getAll(pagination);
   }
 
   @Get('/referrer/:name')
@@ -52,8 +54,9 @@ export class ClientsController {
   })
   getAllByReferrer(
     @Param('name') name: string,
-  ): Observable<ClientReadReferrersDto[]> {
-    return this._service.getAllByReferrer(name.toLocaleLowerCase());
+    @Param('pagination') pagination?: PaginationInDto
+  ): Observable<PaginationOutReferrersDto> {
+    return this._service.getAllByReferrer(name, pagination);
   }
 
   @Get(':id')

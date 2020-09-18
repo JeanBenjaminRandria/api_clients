@@ -54,7 +54,7 @@ describe('ClientsController', () => {
           useValue: {
             create: jest.fn,
             save: jest.fn,
-            find: jest.fn(),
+            findAndCount: jest.fn(),
             findOne: jest.fn(),
             update: jest.fn,
             delete: jest.fn,
@@ -88,11 +88,11 @@ describe('ClientsController', () => {
     it('getAll ', async () => {
       const getAllSpy = jest
         .spyOn(service, 'getAll')
-        .mockReturnValue(of([plainToClass(ClientReadDto, clientDtoSaved)]));
+        .mockReturnValue(of({count: 1, clients:[plainToClass(ClientReadDto, clientDtoSaved)]}));
       controller.getAllClients().subscribe(res => {
-        expect(res).toEqual([plainToClass(ClientReadDto, clientDtoSaved)]);
+        expect(res).toEqual({count: 1, clients:[plainToClass(ClientReadDto, clientDtoSaved)]});
       });
-      expect(getAllSpy).toBeCalledWith();
+      expect(getAllSpy).toBeCalledWith(undefined);
       expect(getAllSpy).toBeCalledTimes(1);
     });
   });
@@ -100,14 +100,14 @@ describe('ClientsController', () => {
   describe('find all Clients by referrer', () => {
     it('getAllByReferrer ', async () => {
       const name = referrer.name.slice(0, -3);
-      const data = plainToClass(ClientReadReferrersDto, referrerDtoSaved);
+      const data ={count: 1, clients:[plainToClass(ClientReadReferrersDto, referrerDtoSaved)]};
       const getAllSpy = jest
         .spyOn(service, 'getAllByReferrer')
-        .mockReturnValue(of([data]));
+        .mockReturnValue(of(data));
       controller.getAllByReferrer(name).subscribe(res => {
-        expect(res).toEqual([data]);
+        expect(res).toEqual(data);
       });
-      expect(getAllSpy).toBeCalledWith(name);
+      expect(getAllSpy).toBeCalledWith(name, undefined);
       expect(getAllSpy).toBeCalledTimes(1);
     });
   });

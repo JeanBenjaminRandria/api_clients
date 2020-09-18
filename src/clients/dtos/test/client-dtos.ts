@@ -8,6 +8,7 @@ import { ClientReadDto } from '../clients/client-read.dto';
 import { ClientUpdateDto } from '../clients/client-update.dto';
 import { ClientDto } from '../clients/client.dtos';
 import { ClientReadReferrersDto } from '../clients/client-referrers.dto';
+import { PaginationClientsDto } from '../paginations/pagination-clients.dto';
 
 describe('Test client dots', () => {
   const referrer: Client = {
@@ -31,6 +32,12 @@ describe('Test client dots', () => {
   };
 
   referrer.referrers = [client];
+
+  const pagination = {
+    count: 1,
+    clients: [client]
+  }
+  
 
   it('Client Micro Dto', () => {
     const expectDto: ClientMicroDto = {
@@ -117,5 +124,12 @@ describe('Test client dots', () => {
     };
     const clientUpdate = plainToClass(ClientUpdateDto, client);
     expect(clientUpdate).toEqual(expectDto);
+  });
+
+  it('Pagination Dto', () => {
+
+    const paginationDto = plainToClass(PaginationClientsDto, pagination);
+    expect(paginationDto.clients[0]).toEqual(client);
+    expect(pagination.count).toEqual(paginationDto.count);
   });
 });

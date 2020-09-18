@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { of } from 'rxjs';
 import { plainToClass } from 'class-transformer';
-
 import { ClientsService } from '../clients.service';
 import { ClientsRepository } from '../clients.repository';
 import {
@@ -12,7 +11,6 @@ import {
   referrerDtoSaved,
 } from './data-test';
 import { ClientEntity } from '../client.entity';
-
 import {
   ClientReadDto,
   ClientReadExDto,
@@ -43,7 +41,7 @@ describe('ClientsService', () => {
           useValue: {
             create: jest.fn,
             save: jest.fn,
-            find: jest.fn(),
+            findAndCount: jest.fn(),
             findOne: jest.fn(),
             update: jest.fn,
             delete: jest.fn,
@@ -77,9 +75,9 @@ describe('ClientsService', () => {
     it('getAll ', async () => {
       const getAllSpy = jest
         .spyOn(repository, 'getAll')
-        .mockReturnValue(of([clientDtoSaved]));
+        .mockReturnValue(of({count: 1, clients:[clientDtoSaved]}));
       service.getAll().subscribe(res => {
-        expect(res).toEqual([plainToClass(ClientReadDto, clientDtoSaved)]);
+        expect(res).toEqual({count: 1, clients:[plainToClass(ClientReadDto, clientDtoSaved)]});
       });
       expect(getAllSpy).toHaveBeenCalled();
       expect(getAllSpy).toBeCalledTimes(1);
@@ -91,13 +89,13 @@ describe('ClientsService', () => {
       const name = referrer.name.slice(0, -3);
       const getAllSpy = jest
         .spyOn(repository, 'getAllByReferrer')
-        .mockReturnValue(of([referrerDtoSaved]));
+        .mockReturnValue(of({count: 1, clients:[referrerDtoSaved]}));
       service.getAllByReferrer(name).subscribe(res => {
-        expect(res).toEqual([
+        expect(res).toEqual({count: 1, clients:[
           plainToClass(ClientReadReferrersDto, referrerDtoSaved),
-        ]);
+        ]});
       });
-      expect(getAllSpy).toBeCalledWith(name);
+      expect(getAllSpy).toBeCalledWith(name, undefined);
       expect(getAllSpy).toBeCalledTimes(1);
     });
   });
