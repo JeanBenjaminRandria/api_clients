@@ -1,4 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { of } from 'rxjs';
+import { plainToClass } from 'class-transformer';
 import { ClientsService } from '../clients.service';
 import { ClientsRepository } from '../clients.repository';
 import {
@@ -7,13 +10,12 @@ import {
   referrer,
   referrerDtoSaved,
 } from './data-test';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import { ClientEntity } from '../client.entity';
-import { of } from 'rxjs';
-import { plainToClass } from 'class-transformer';
-import { ClientReadDto } from '../dtos/client-read.dto';
-import { ClientReadExDto } from '../dtos/client-read-ex.dto';
-import { ClientReadReferrersDto } from '../dtos/client-referrers.dto';
+import {
+  ClientReadDto,
+  ClientReadExDto,
+  ClientReadReferrersDto,
+} from '../dtos';
 
 describe('ClientsService', () => {
   let service: ClientsService;
@@ -39,7 +41,7 @@ describe('ClientsService', () => {
           useValue: {
             create: jest.fn,
             save: jest.fn,
-            find: jest.fn(),
+            findAndCount: jest.fn(),
             findOne: jest.fn(),
             update: jest.fn,
             delete: jest.fn,
@@ -73,9 +75,12 @@ describe('ClientsService', () => {
     it('getAll ', async () => {
       const getAllSpy = jest
         .spyOn(repository, 'getAll')
-        .mockReturnValue(of([clientDtoSaved]));
+        .mockReturnValue(of({ count: 1, clients: [clientDtoSaved] }));
       service.getAll().subscribe(res => {
-        expect(res).toEqual([plainToClass(ClientReadDto, clientDtoSaved)]);
+        expect(res).toEqual({
+          count: 1,
+          clients: [plainToClass(ClientReadDto, clientDtoSaved)],
+        });
       });
       expect(getAllSpy).toHaveBeenCalled();
       expect(getAllSpy).toBeCalledTimes(1);
@@ -87,13 +92,14 @@ describe('ClientsService', () => {
       const name = referrer.name.slice(0, -3);
       const getAllSpy = jest
         .spyOn(repository, 'getAllByReferrer')
-        .mockReturnValue(of([referrerDtoSaved]));
+        .mockReturnValue(of({ count: 1, clients: [referrerDtoSaved] }));
       service.getAllByReferrer(name).subscribe(res => {
-        expect(res).toEqual([
-          plainToClass(ClientReadReferrersDto, referrerDtoSaved),
-        ]);
+        expect(res).toEqual({
+          count: 1,
+          clients: [plainToClass(ClientReadReferrersDto, referrerDtoSaved)],
+        });
       });
-      expect(getAllSpy).toBeCalledWith(name);
+      expect(getAllSpy).toBeCalledWith(name, undefined);
       expect(getAllSpy).toBeCalledTimes(1);
     });
   });

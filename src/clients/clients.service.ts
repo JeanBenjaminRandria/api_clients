@@ -1,12 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { ClientsRepository } from './clients.repository';
 import { Observable } from 'rxjs';
-import { ClientDto, ClientUpdateDto, ClientReadDto } from './dtos';
 import { map } from 'rxjs/operators';
 import { plainToClass } from 'class-transformer';
-import { ClientReadExDto } from './dtos/client-read-ex.dto';
-import { MessageDto } from './dtos/message.dto';
-import { ClientReadReferrersDto } from './dtos/client-referrers.dto';
+import { ClientsRepository } from './clients.repository';
+import {
+  ClientDto,
+  ClientUpdateDto,
+  ClientReadDto,
+  ClientReadExDto,
+  MessageDto,
+  ClientReadReferrersDto,
+  PaginationClientsReadDto,
+  PaginationOutReferrersDto,
+  PaginationClientsDto,
+  PaginationInDto,
+} from './dtos';
 
 @Injectable()
 export class ClientsService {
@@ -18,16 +26,31 @@ export class ClientsService {
       .pipe(map(client => plainToClass(ClientReadDto, client)));
   }
 
-  getAll(): Observable<ClientReadDto[]> {
-    return this._repository
-      .getAll()
-      .pipe(map(client => plainToClass(ClientReadDto, client)));
+  getAll(pagination?: PaginationInDto): Observable<PaginationClientsReadDto> {
+    return this._repository.getAll(pagination).pipe(
+      map((value: PaginationClientsDto) => {
+        return {
+          count: value.count,
+          clients: value.clients.map(cli => plainToClass(ClientReadDto, cli)),
+        };
+      }),
+    );
   }
 
-  getAllByReferrer(name: string): Observable<ClientReadReferrersDto[]> {
-    return this._repository
-      .getAllByReferrer(name)
-      .pipe(map(client => plainToClass(ClientReadReferrersDto, client)));
+  getAllByReferrer(
+    name: string,
+    pagination?: PaginationInDto,
+  ): Observable<PaginationOutReferrersDto> {
+    return this._repository.getAllByReferrer(name, pagination).pipe(
+      map((value: PaginationClientsDto) => {
+        return {
+          count: value.count,
+          clients: value.clients.map(cli =>
+            plainToClass(ClientReadReferrersDto, cli),
+          ),
+        };
+      }),
+    );
   }
 
   get(id: number): Observable<ClientReadExDto> {

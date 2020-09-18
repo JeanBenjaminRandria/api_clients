@@ -10,14 +10,18 @@ import {
   HttpStatus,
   Patch,
 } from '@nestjs/common';
-import { ApiTags, ApiCreatedResponse } from '@nestjs/swagger';
+import { ApiTags, ApiCreatedResponse, ApiParam } from '@nestjs/swagger';
 import { ClientsService } from './clients.service';
 import { Observable } from 'rxjs';
-import { ClientDto, ClientUpdateDto } from './dtos';
-import { ClientReadDto } from './dtos/client-read.dto';
-import { ClientReadExDto } from './dtos/client-read-ex.dto';
-import { MessageDto } from './dtos/message.dto';
-import { ClientReadReferrersDto } from './dtos/client-referrers.dto';
+import {
+  ClientDto,
+  ClientUpdateDto,
+  ClientReadDto,
+  ClientReadExDto,
+  MessageDto,
+  PaginationClientsReadDto,
+  PaginationOutReferrersDto
+} from './dtos';
 
 @ApiTags('Client')
 @Controller('clients')
@@ -33,24 +37,34 @@ export class ClientsController {
     return this._service.create(clientProspec);
   }
 
-  @Get()
+  @ApiParam({ name: 'take', required: false })
+  @ApiParam({ name: 'skip', required: false })
+  @Get('all/:take?/:skip?')
   @ApiCreatedResponse({
     description: 'Get all clients actives',
-    type: [ClientReadDto],
+    type: [PaginationClientsReadDto],
   })
-  getAllClients(): Observable<ClientReadDto[]> {
-    return this._service.getAll();
+  getAllClients(
+    @Param('take') take?: number,
+    @Param('skip') skip?: number,
+  ): Observable<PaginationClientsReadDto> {
+    return this._service.getAll({ take, skip });
   }
 
-  @Get('/referrer/:name')
+  @Get('/referrer/:name/:take?/:skip?')
+  @ApiParam({ name: 'take', required: false })
+  @ApiParam({ name: 'skip', required: false })
+  @ApiParam({ name: 'name', required: true })
   @ApiCreatedResponse({
     description: 'Get all clients actives by referrer',
-    type: [ClientReadDto],
+    type: [PaginationOutReferrersDto],
   })
   getAllByReferrer(
     @Param('name') name: string,
-  ): Observable<ClientReadReferrersDto[]> {
-    return this._service.getAllByReferrer(name.toLocaleLowerCase());
+    @Param('take') take?: number,
+    @Param('skip') skip?: number,
+  ): Observable<PaginationOutReferrersDto> {
+    return this._service.getAllByReferrer(name, { take, skip });
   }
 
   @Get(':id')

@@ -7,12 +7,14 @@ import { ClientEntity } from '../../src/clients/client.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import {
   ClientDto,
-  ClientReadDto,
   ClientUpdateDto,
+  ClientReadExDto,
+  ClientReadReferrersDto,
+  PaginationClientsReadDto,
+  ClientReadDto,
+  PaginationOutReferrersDto,
 } from '../../src/clients/dtos';
 import { Client } from '../../src/clients/client.interface';
-import { ClientReadExDto } from '../../src/clients/dtos/client-read-ex.dto';
-import { ClientReadReferrersDto } from 'src/clients/dtos/client-referrers.dto';
 
 describe('CientsController (e2e)', () => {
   let app: INestApplication;
@@ -56,15 +58,46 @@ describe('CientsController (e2e)', () => {
     clientRepository.manager.connection.close();
   });
 
-  it('/client (GET)', async done => {
-    await request(app.getHttpServer())
-      .get('/clients')
-      .expect(200)
-      .expect(({ body }) => {
-        const clients: ClientReadDto[] = body;
-        expect(clients.length).toBe(2);
-      });
-    done();
+  describe('Get All Clients ', () => {
+    let clientRes: ClientReadDto;
+
+    it('/client (GET)', async done => {
+      await request(app.getHttpServer())
+        .get('/clients/all')
+        .expect(200)
+        .expect(({ body }) => {
+          const pagination: PaginationClientsReadDto = body;
+          expect(pagination.count).toBe(2);
+          expect(pagination.clients.length).toBe(2);
+        });
+      done();
+    });
+
+    it('/client/take (GET)', async done => {
+      await request(app.getHttpServer())
+        .get('/clients/all/1')
+        .expect(200)
+        .expect(({ body }) => {
+          const pagination: PaginationClientsReadDto = body;
+          expect(pagination.count).toBe(2);
+          expect(pagination.clients.length).toBe(1);
+          clientRes = pagination.clients[0];
+        });
+      done();
+    });
+
+    it('/client/take/skip (GET)', async done => {
+      await request(app.getHttpServer())
+        .get('/clients/all/1/1')
+        .expect(200)
+        .expect(({ body }) => {
+          const pagination: PaginationClientsReadDto = body;
+          expect(pagination.count).toBe(2);
+          expect(pagination.clients.length).toBe(1);
+          expect(pagination.clients[0]).not.toEqual(clientRes);
+        });
+      done();
+    });
   });
 
   describe('Get Client By Refferer', () => {
@@ -73,9 +106,10 @@ describe('CientsController (e2e)', () => {
         .get(`/clients/referrer/${client.name}`)
         .expect(200)
         .expect(({ body }) => {
-          const client1: ClientReadReferrersDto = body[0];
-          expect(body.length).toBeGreaterThan(0);
-          expect(client1.referrers.length).toBeGreaterThan(0);
+          const pagination: PaginationOutReferrersDto = body;
+          expect(pagination.count).toBeGreaterThan(0);
+          const clients: ClientReadReferrersDto[] = pagination.clients;
+          expect(clients[0].referrers.length).toBeGreaterThan(0);
         });
 
       done();
@@ -87,9 +121,10 @@ describe('CientsController (e2e)', () => {
         .get(`/clients/referrer/${name}`)
         .expect(200)
         .expect(({ body }) => {
-          const client1: ClientReadReferrersDto = body[0];
-          expect(body.length).toBeGreaterThan(0);
-          expect(client1.referrers.length).toBeGreaterThan(0);
+          const pagination: PaginationOutReferrersDto = body;
+          expect(pagination.count).toBeGreaterThan(0);
+          const clients: ClientReadReferrersDto[] = pagination.clients;
+          expect(clients[0].referrers.length).toBeGreaterThan(0);
         });
       done();
     });
@@ -243,17 +278,19 @@ describe('CientsController (e2e)', () => {
     });
 
     it('Delete id no found', async done => {
-      const getAllActive = await request(app.getHttpServer()).get('/clients');
+      const getAllActive = await request(app.getHttpServer()).get(
+        '/clients/all',
+      );
       await request(app.getHttpServer())
         .delete(`/clients/${clientToClient.id}`)
         .expect(202);
       const getAllActiveNew = await request(app.getHttpServer()).get(
-        '/clients',
+        '/clients/all',
       );
 
-      expect(getAllActive.body.length).toBeGreaterThan(
-        getAllActiveNew.body.length,
-      );
+      const clientsAll: PaginationClientsReadDto = getAllActive.body;
+      const clients: PaginationClientsReadDto = getAllActiveNew.body;
+      expect(clientsAll.count).toBeGreaterThan(clients.count);
 
       done();
     });

@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { FindOperator, Like, Raw, Repository } from 'typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Client } from '../client.interface';
 import { ClientsRepository } from '../clients.repository';
-import { getRepositoryToken } from '@nestjs/typeorm';
 import { ClientEntity } from '../client.entity';
 import {
   clientDto,
@@ -12,7 +12,11 @@ import {
   referrer,
   referrerDtoSaved,
 } from './data-test';
-import { ClientDto, ClientUpdateDto } from '../dtos';
+import {
+  ClientDto,
+  ClientUpdateDto,
+  PaginationClientsDto,
+} from '../dtos';
 import { Status } from '../status.enum';
 
 describe('Clients Repository', () => {
@@ -28,7 +32,7 @@ describe('Clients Repository', () => {
           useValue: {
             create: jest.fn,
             save: jest.fn,
-            find: jest.fn(),
+            findAndCount: jest.fn(),
             findOne: jest.fn(),
             update: jest.fn,
             delete: jest.fn,
@@ -154,27 +158,38 @@ describe('Clients Repository', () => {
   });
 
   describe('getAll', () => {
-    it('return one result', async () => {
-      jest.spyOn(repository, 'find').mockResolvedValue([clientDtoSaved]);
-      const foundClient = await clientsRepository.getAll().toPromise();
-      expect(foundClient).toEqual([clientDtoSaved]);
-      expect(repository.find).lastCalledWith({
+    it('return all clients', async () => {
+      jest
+        .spyOn(repository, 'findAndCount')
+        .mockResolvedValue([[clientDtoSaved], 1]);
+      const res: PaginationClientsDto = await clientsRepository
+        .getAll()
+        .toPromise();
+      expect(res.count).toBe(1);
+      expect(res.clients).toEqual([clientDtoSaved]);
+      expect(repository.findAndCount).lastCalledWith({
         where: { status: Status.ACTIVE },
+        order: { name: 'DESC' },
+        take: 10,
+        skip: 0,
         relations: ['referrer'],
       });
-      expect(repository.find).toBeCalledTimes(1);
+      expect(repository.findAndCount).toBeCalledTimes(1);
     });
   });
 
   describe('getAllByReferrerName', () => {
-    it('return all result', async () => {
+    it('return all referrers result', async () => {
       const name = referrer.name.slice(0, -3);
-      jest.spyOn(repository, 'find').mockResolvedValue([referrerDtoSaved]);
-      const foundClient = await clientsRepository
+      jest
+        .spyOn(repository, 'findAndCount')
+        .mockResolvedValue([[referrerDtoSaved], 1]);
+      const res: PaginationClientsDto = await clientsRepository
         .getAllByReferrer(name)
         .toPromise();
-      expect(foundClient).toEqual([referrerDtoSaved]);
-      expect(repository.find).toBeCalledTimes(1);
+      expect(res.count).toBe(1);
+      expect(res.clients).toEqual([referrerDtoSaved]);
+      expect(repository.findAndCount).toBeCalledTimes(1);
     });
   });
 
