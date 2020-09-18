@@ -3,7 +3,7 @@ import { ClientsController } from './clients.controller';
 import { ClientsService } from './clients.service';
 import { ClientsRepository } from './clients.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ClientEntity } from './client.entity';
+import { ClientEntity } from './model/client.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ClientEntity])],

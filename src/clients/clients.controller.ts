@@ -20,7 +20,7 @@ import {
   ClientReadExDto,
   MessageDto,
   PaginationClientsReadDto,
-  PaginationOutReferrersDto
+  PaginationOutReferrersDto,
 } from './dtos';
 
 @ApiTags('Client')

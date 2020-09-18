@@ -10,7 +10,7 @@ import {
   referrer,
   referrerDtoSaved,
 } from './data-test';
-import { ClientEntity } from '../client.entity';
+import { ClientEntity } from '../model/client.entity';
 import {
   ClientReadDto,
   ClientReadExDto,

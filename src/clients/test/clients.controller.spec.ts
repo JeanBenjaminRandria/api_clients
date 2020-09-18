@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { plainToClass } from 'class-transformer';
 import { of } from 'rxjs';
-import { ClientEntity } from '../client.entity';
+import { ClientEntity } from '../model/client.entity';
 import {
   ClientReadDto,
   ClientReadExDto,
@@ -86,14 +86,12 @@ describe('ClientsController', () => {
 
   describe('find all Clients', () => {
     it('getAll ', async () => {
-      const getAllSpy = jest
-        .spyOn(service, 'getAll')
-        .mockReturnValue(
-          of({
-            count: 1,
-            clients: [plainToClass(ClientReadDto, clientDtoSaved)],
-          }),
-        );
+      const getAllSpy = jest.spyOn(service, 'getAll').mockReturnValue(
+        of({
+          count: 1,
+          clients: [plainToClass(ClientReadDto, clientDtoSaved)],
+        }),
+      );
       controller.getAllClients().subscribe(res => {
         expect(res).toEqual({
           count: 1,

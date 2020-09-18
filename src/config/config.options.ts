@@ -1,11 +1,10 @@
 import appConfig from './app.config';
 import databaseConfig from './database.config';
-import tokenConfig from './token.config';
 import * as Joi from '@hapi/joi';
 
 export const configOptions = {
   isGlobal: true,
-  load: [appConfig, databaseConfig, tokenConfig],
+  load: [appConfig, databaseConfig],
   validationSchema: Joi.object({
     NODE_ENV: Joi.string()
       .valid('development', 'production', 'test', 'provision')

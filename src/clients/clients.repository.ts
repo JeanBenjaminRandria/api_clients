@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { ClientEntity } from './client.entity';
+import { ClientEntity } from './model/client.entity';
 import {
   BadRequestException,
   HttpException,
@@ -9,7 +9,7 @@ import {
 import { Raw, Repository } from 'typeorm';
 import { Observable, from, of, throwError, merge, concat } from 'rxjs';
 import { map, mergeMap, filter, distinct, tap } from 'rxjs/operators';
-import { Client } from './client.interface';
+import { Client } from './model/client.interface';
 import {
   ClientDto,
   ClientUpdateDto,

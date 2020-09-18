@@ -3,7 +3,7 @@ import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { Repository } from 'typeorm';
-import { ClientEntity } from '../../src/clients/client.entity';
+import { ClientEntity } from '../../src/clients/model/client.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import {
   ClientDto,
@@ -14,7 +14,7 @@ import {
   ClientReadDto,
   PaginationOutReferrersDto,
 } from '../../src/clients/dtos';
-import { Client } from '../../src/clients/client.interface';
+import { Client } from '../../src/clients/model/client.interface';
 
 describe('CientsController (e2e)', () => {
   let app: INestApplication;

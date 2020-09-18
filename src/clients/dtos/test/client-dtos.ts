@@ -1,5 +1,5 @@
 import { plainToClass } from 'class-transformer';
-import { Client } from '../../client.interface';
+import { Client } from '../../model/client.interface';
 import { Status } from '../../status.enum';
 import { ClientMicroDto } from '..';
 import { ClientMinDto } from '../clients/client-min.dto';
