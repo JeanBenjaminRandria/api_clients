@@ -1,6 +1,6 @@
 import { plainToClass } from 'class-transformer';
 import { Client } from '../../model/client.interface';
-import { Status } from '../../status.enum';
+import { Status } from '../../../shared/status.enum';
 import { ClientMicroDto } from '..';
 import { ClientMinDto } from '../clients/client-min.dto';
 import { ClientReadExDto } from '../clients/client-read-ex.dto';

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import {  Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Client } from '../model/client.interface';
 import { ClientsRepository } from '../clients.repository';
 import { ClientEntity } from '../model/client.entity';
@@ -13,7 +13,7 @@ import {
   referrerDtoSaved,
 } from './data-test';
 import { ClientDto, ClientUpdateDto, PaginationClientsDto } from '../dtos';
-import { Status } from '../status.enum';
+import { Status } from '../../shared/status.enum';
 
 describe('Clients Repository', () => {
   let repository: Repository<Client>;

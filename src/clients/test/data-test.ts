@@ -1,6 +1,6 @@
 import { ClientDto } from '../dtos';
 import { Client } from '../model/client.interface';
-import { Status } from '../status.enum';
+import { Status } from '../../shared/status.enum';
 
 export const referrer: Client = {
   id: 123,
