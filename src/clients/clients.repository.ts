@@ -6,7 +6,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { Observable, from, of, throwError, merge, concat } from 'rxjs';
 import { map, mergeMap, filter, distinct } from 'rxjs/operators';
 import { Client } from './model/client.interface';
@@ -90,14 +90,8 @@ export class ClientsRepository {
     return from(this._repository.save(client))
   }
 
-  update(id: number, clientProspect: ClientUpdateDto): Observable<Client> {
-    return this.validate(
-      this.findOne(id, false),
-      undefined,
-      new NotFoundException('Client has not been found'),
-    )
-      .pipe(mergeMap(() => this._repository.update(id, clientProspect)))
-      .pipe(mergeMap(() => this.get(id)));
+  update(id: number, clientProspect: ClientUpdateDto): Observable<UpdateResult> {
+    return from(this._repository.update(id, clientProspect));
   }
 
   private validate<T>(
@@ -116,18 +110,18 @@ export class ClientsRepository {
     );
   }
 
-  delete(id: number): Observable<MessageDto> {
-    const find = this.findOne(id, false)
-      .pipe(filter(cli => cli !== undefined))
-      .pipe(
-        map(cli => {
-          cli.status = Status.INACTIVE;
-          return cli;
-        }),
-      )
-      .pipe(mergeMap(cli => from(this._repository.save(cli))))
-      .pipe(mergeMap(() => of({ message: 'success' })));
+  // delete(id: number): Observable<MessageDto> {
+  //   const find = this.findOne(id, false)
+  //     .pipe(filter(cli => cli !== undefined))
+  //     .pipe(
+  //       map(cli => {
+  //         cli.status = Status.INACTIVE;
+  //         return cli;
+  //       }),
+  //     )
+  //     .pipe(mergeMap(cli => from(this._repository.save(cli))))
+  //     .pipe(mergeMap(() => of({ message: 'success' })));
 
-    return find;
-  }
+  //   return find;
+  // }
 }

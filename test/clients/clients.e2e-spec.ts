@@ -239,40 +239,40 @@ describe('CientsController (e2e)', () => {
   
   });
 
-  // describe('/clients/:id (PATH)', () => {
-  //   const clientUp: ClientUpdateDto = {
-  //     name: 'Client Modificado',
-  //   };
-  //   it('Id no exist', async done => {
-  //     await request(app.getHttpServer())
-  //       .patch(`/clients/1000`)
-  //       .type('application/json')
-  //       .send(clientUp)
-  //       .expect(404)
-  //       .expect(({ body }) => {
-  //         expect(body.message).toEqual('Client has not been found');
-  //       });
-  //     done();
-  //   });
+  describe('/clients/:id (PATH)', () => {
+    const clientUp: ClientUpdateDto = {
+      name: 'Client Modificado',
+    };
+    it('Id no exist', async done => {
+      await request(app.getHttpServer())
+        .patch(`/clients/1000`)
+        .type('application/json')
+        .send(clientUp)
+        .expect(404)
+        .expect(({ body }) => {
+          expect(body.message).toEqual('Client has not been found');
+        });
+      done();
+    });
 
-  //   it('client exist', async done => {
-  //     const find = await request(app.getHttpServer()).get(
-  //       `/clients/${clientToClient.id}`,
-  //     );
-  //     const clientOrigin: ClientReadExDto = find.body;
-  //     clientOrigin.name = clientUp.name;
-  //     await request(app.getHttpServer())
-  //       .patch(`/clients/${clientOrigin.id}`)
-  //       .type('application/json')
-  //       .send(clientUp)
-  //       .expect(200)
-  //       .expect(({ body }) => {
-  //         const clientReceived: ClientReadExDto = body;
-  //         expect(clientReceived).toEqual(clientOrigin);
-  //       });
-  //     done();
-  //   });
-  // });
+    it('client exist', async done => {
+      const find = await request(app.getHttpServer()).get(
+        `/clients/${clientToClient.id}`,
+      );
+      const clientOrigin: ClientReadExDto = find.body;
+      clientOrigin.name = clientUp.name;
+      await request(app.getHttpServer())
+        .patch(`/clients/${clientOrigin.id}`)
+        .type('application/json')
+        .send(clientUp)
+        .expect(200)
+        .expect(({ body }) => {
+          const clientReceived: ClientReadExDto = body;
+          expect(clientReceived).toEqual(clientOrigin);
+        });
+      done();
+    });
+  });
 
   describe('clients/:id (DELETE)', () => {
     it('Delete id no found', async done => {

@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { of } from 'rxjs';
+import { from, of } from 'rxjs';
 import { plainToClass } from 'class-transformer';
 import { ClientsService } from '../clients.service';
 import { ClientsRepository } from '../clients.repository';
@@ -8,7 +8,7 @@ import {
   clientDtoSaved,
   clientDto,
   referrer,
-  referrerDtoSaved, idNoExist
+  referrerDtoSaved, idNoExist, updateRes
 } from './data-test';
 import { ClientEntity } from '../model/client.entity';
 import {
@@ -16,6 +16,7 @@ import {
   ClientReadDto,
   ClientReadExDto,
   ClientReadReferrersDto,
+  ClientUpdateDto,
 } from '../dtos';
 
 describe('ClientsService', () => {
@@ -178,28 +179,83 @@ describe('ClientsService', () => {
   });
 
   describe('Update one Client', () => {
-    it('Update one client exist ', async () => {
-      const updateSpy = jest
-        .spyOn(repository, 'update')
-        .mockReturnValue(of(clientDtoSaved));
-      service.update(clientDtoSaved.id, clientDto).subscribe(res => {
-        expect(res).toEqual(plainToClass(ClientReadExDto, clientDtoSaved));
-      });
-      expect(updateSpy).toBeCalledWith(clientDtoSaved.id, clientDto);
-      expect(updateSpy).toBeCalledTimes(1);
+    // it('Update one client exist ', async () => {
+    //   const updateSpy = jest
+    //     .spyOn(repository, 'update')
+    //     .mockReturnValue(of(clientDtoSaved));
+    //   service.update(clientDtoSaved.id, clientDto).subscribe(res => {
+    //     expect(res).toEqual(plainToClass(ClientReadExDto, clientDtoSaved));
+    //   });
+    //   expect(updateSpy).toBeCalledWith(clientDtoSaved.id, clientDto);
+    //   expect(updateSpy).toBeCalledTimes(1);
+    // });
+
+    it('return one result', async () => {
+      const clientUp: ClientUpdateDto = {
+        name: 'client updated',
+      };
+      jest.spyOn(repository, 'findOne').mockReturnValue(of(clientDtoSaved));
+      jest.spyOn(repository, 'update').mockReturnValueOnce(of(updateRes));
+      await service.update(clientDtoSaved.id, clientUp).toPromise();
+      expect(repository.findOne).toBeCalledTimes(2);
+      expect(repository.update).lastCalledWith(clientDtoSaved.id, clientUp);
+      expect(repository.update).toBeCalledTimes(1);
+    });
+
+    it('return a null result', async () => {
+      jest.spyOn(repository, 'findOne').mockReturnValue(of(undefined));
+      try {
+        await service.update(100, clientDto).toPromise();
+      } catch (e) {
+        expect(e).toBeDefined();
+        expect(e.message).toEqual('Client has not been found')
+      }
     });
   });
 
-  describe('delete one Client', () => {
-    it('get one client exist ', async () => {
-      const getSpy = jest
-        .spyOn(repository, 'delete')
-        .mockReturnValue(of({ message: 'success' }));
-      service.delete(clientDtoSaved.id).subscribe(res => {
-        expect(res).toEqual({ message: 'success' });
+  // describe('delete one Client', () => {
+  //   it('get one client exist ', async () => {
+  //     const getSpy = jest
+  //       .spyOn(repository, 'delete')
+  //       .mockReturnValue(of({ message: 'success' }));
+  //     service.delete(clientDtoSaved.id).subscribe(res => {
+  //       expect(res).toEqual({ message: 'success' });
+  //     });
+  //     expect(getSpy).toBeCalledWith(clientDtoSaved.id);
+  //     expect(getSpy).toBeCalledTimes(1);
+  //   });
+  // });
+
+  describe('Delete', () => {
+    it('Delete with id no found', async () => {
+      const find = jest
+        .spyOn(repository, 'findOne')
+        .mockReturnValue(of(undefined));
+      const saved = jest.spyOn(repository, 'saveClient');
+      let foundClient;
+      service.delete(1).subscribe({
+        next: x => {
+          foundClient = x;
+        },
       });
-      expect(getSpy).toBeCalledWith(clientDtoSaved.id);
-      expect(getSpy).toBeCalledTimes(1);
+      // const foundClient = await clientsRepository.delete(1).toPromise();
+      expect(foundClient).toEqual(undefined);
+      expect(find).toHaveBeenCalledTimes(1);
+      expect(repository.saveClient).not.toBeCalled();
+    });
+
+    it('return result delete', async () => {
+      const find = jest
+        .spyOn(repository, 'findOne')
+        .mockReturnValue(of(clientDtoSaved));
+      const saved = jest
+        .spyOn(repository, 'saveClient')
+        .mockReturnValue(of(clientDtoSaved));
+      // clientsRepository.delete(1).subscribe()
+      const foundClient = await service.delete(1).toPromise();
+      expect(foundClient).toEqual({ message: 'success' });
+      expect(find).toHaveBeenCalledTimes(1);
+      expect(saved).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -16,12 +16,13 @@ import {
   PaginationInDto,
 } from './dtos';
 import { Client } from './model/client.interface';
+import { Status } from '../shared/status.enum';
 
 @Injectable()
 export class ClientsService {
-  constructor(private readonly _repository: ClientsRepository) {}
+  constructor(private readonly _repository: ClientsRepository) { }
 
-  
+
 
   getAll(pagination?: PaginationInDto): Observable<PaginationClientsReadDto> {
     return this._repository.getAll(pagination).pipe(
@@ -39,16 +40,16 @@ export class ClientsService {
     pagination?: PaginationInDto,
   ): Observable<PaginationOutReferrersDto> {
     return this._repository.getAllByReferrer(name, pagination)
-    .pipe(
-      map(([clients, count]) => {
-        return {
-          count: count,
-          clients: clients.map(cli =>
-            plainToClass(ClientReadReferrersDto, cli),
-          ),
-        };
-      }),
-    );
+      .pipe(
+        map(([clients, count]) => {
+          return {
+            count: count,
+            clients: clients.map(cli =>
+              plainToClass(ClientReadReferrersDto, cli),
+            ),
+          };
+        }),
+      );
   }
 
   private validate<T>(
@@ -74,7 +75,7 @@ export class ClientsService {
       undefined,
       new NotFoundException(`Client has not been found`),
     )
-    .pipe(map(client => plainToClass(ClientReadExDto, client)));
+      .pipe(map(client => plainToClass(ClientReadExDto, client)));
 
     // return this._repository
     //   .get(id)
@@ -112,7 +113,7 @@ export class ClientsService {
       .pipe(distinct())
       .pipe(filter(val => val === undefined))
       .pipe(mergeMap(() => this._repository.saveClient(clientProspect)))
-      .pipe( mergeMap(cli => this.get(cli.id)))
+      .pipe(mergeMap(cli => this.get(cli.id)))
       .pipe(map(client => plainToClass(ClientReadDto, client)));
   }
 
@@ -126,12 +127,30 @@ export class ClientsService {
     id: number,
     clientProspect: ClientUpdateDto,
   ): Observable<ClientReadExDto> {
-    return this._repository
-      .update(id, clientProspect)
-      .pipe(map(cli => plainToClass(ClientReadExDto, cli)));
+    return this.validate(
+      this._repository.findOne(id, false),
+      undefined,
+      new NotFoundException('Client has not been found'),
+    )
+      .pipe(mergeMap(() => this._repository.update(id, clientProspect)))
+      .pipe(mergeMap(() => this.get(id)));
   }
 
   delete(id: number): Observable<MessageDto> {
-    return this._repository.delete(id);
+
+
+    const find = this._repository.findOne(id, false)
+      .pipe(filter(cli => cli !== undefined))
+      .pipe(
+        map(cli => {
+          cli.status = Status.INACTIVE;
+          return cli;
+        }),
+      )
+      .pipe(mergeMap(cli => from(this._repository.saveClient(cli))))
+      .pipe(mergeMap(() => of({ message: 'success' })));
+
+    return find;
+
   }
 }
