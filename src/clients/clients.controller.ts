@@ -10,18 +10,23 @@ import {
   HttpStatus,
   Patch,
 } from '@nestjs/common';
-import { ApiTags, ApiCreatedResponse, ApiParam } from '@nestjs/swagger';
-import { ClientsService } from './clients.service';
 import { Observable } from 'rxjs';
+import {
+  ApiTags,
+  ApiCreatedResponse,
+  ApiParam,
+  ApiBody,
+} from '@nestjs/swagger';
+import { ClientsService } from './clients.service';
 import {
   ClientDto,
   ClientUpdateDto,
   ClientReadDto,
   ClientReadExDto,
-  MessageDto,
   PaginationClientsReadDto,
   PaginationOutReferrersDto,
 } from './dtos';
+import { MessageDto } from '../shared';
 
 @ApiTags('Client')
 @Controller('clients')
@@ -68,6 +73,7 @@ export class ClientsController {
   }
 
   @Get(':id')
+  @ApiParam({ name: 'id', required: true })
   @ApiCreatedResponse({
     description:
       'Get one client by id, if it does not find a NoFOUND error will be returned',
@@ -78,6 +84,12 @@ export class ClientsController {
   }
 
   @Patch(':id')
+  @ApiParam({ name: 'id', required: true })
+  @ApiBody({
+    description: 'List of cats',
+    type: ClientUpdateDto,
+    required: true,
+  })
   @ApiCreatedResponse({
     description:
       'modify client by id, only name rif or referrerId, if it does not find a NoFOUND error will be returned',
@@ -90,11 +102,12 @@ export class ClientsController {
     return this._service.update(id, clientProspect);
   }
 
+  @Delete(':id')
+  @ApiParam({ name: 'id', required: true })
   @ApiCreatedResponse({
     description: 'modify status client by id',
   })
   @HttpCode(HttpStatus.ACCEPTED)
-  @Delete(':id')
   delete(@Param('id', ParseIntPipe) id: number): Observable<MessageDto> {
     return this._service.delete(id);
   }
