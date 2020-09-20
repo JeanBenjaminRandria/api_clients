@@ -6,9 +6,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Raw, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Observable, from, of, throwError, merge, concat } from 'rxjs';
-import { map, mergeMap, filter, distinct, tap } from 'rxjs/operators';
+import { map, mergeMap, filter, distinct } from 'rxjs/operators';
 import { Client } from './model/client.interface';
 import {
   ClientDto,
@@ -45,20 +45,29 @@ export class ClientsRepository {
     );
   }
 
+  private createQueryGetAllREferrers(
+    name: string,
+    pagination?: PaginationInDto,
+  ): Observable<[Client[], number]> {
+    const sql = this._repository
+      .createQueryBuilder('c')
+      .where(`LOWER("c"."name") like '%${name}%' `)
+      .innerJoinAndSelect('c.referrers', 'refer')
+      .offset(pagination.skip || 0)
+      .limit(pagination.take || 10)
+      .orderBy('"c"."name"');
+    // console.log('res:', sql.getSql() );
+    const res = from(sql.getManyAndCount());
+    return res;
+  }
+
   getAllByReferrer(
     name: string,
     pagination: PaginationInDto = paginationIntDefault,
   ): Observable<PaginationClientsDto> {
     name = name.toLowerCase();
-    return from(
-      this._repository.findAndCount({
-        where: { name: Raw(alias => `LOWER(${alias}) like '%${name}%'`) },
-        take: pagination.take,
-        skip: pagination.skip,
-        order: { name: 'ASC' },
-        relations: ['referrers'],
-      }),
-    ).pipe(
+
+    return this.createQueryGetAllREferrers(name, pagination).pipe(
       map(value => {
         return { count: value[1], clients: value[0] };
       }),
