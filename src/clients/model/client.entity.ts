@@ -1,4 +1,4 @@
-import { BaseEntity } from '../../database/entities/base.entity';
+import { BaseEntity } from '../../shared/database/entities/base.entity';
 import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { Client } from './client.interface';
 

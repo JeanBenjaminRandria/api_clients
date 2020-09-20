@@ -26,7 +26,7 @@
     "migration:revert": "ts-node ./node_modules/typeorm/cli.js migration:revert",
     "db:up": "docker-compose up -d",
     "db:down": "docker-compose down -v",
-    "verify": "npm run db:up && npm run format && npm run lint && npm run migration:run && npm run test:cov && npm run test:e2e && npm run db:down"
+    "verify": "npm run db:up && npm run format && npm run lint && npm run migration:run && npm run test:cov && npm run test:e2e"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
