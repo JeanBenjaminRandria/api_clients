@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { configOptions } from './config/config.options';
+import { configOptions } from './shared/config/config.options';
 import { DatabaseModule } from './shared/database/database.module';
 import { ClientsModule } from './clients/clients.module';
 
