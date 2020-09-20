@@ -31,7 +31,6 @@ describe('Clients Repository', () => {
             findAndCount: jest.fn(),
             findOne: jest.fn(),
             update: jest.fn,
-            delete: jest.fn,
             createQueryBuilder: jest.fn(() => ({
               innerJoinAndSelect: jest.fn().mockReturnThis(),
               where: jest.fn().mockReturnThis(),
@@ -55,7 +54,7 @@ describe('Clients Repository', () => {
 
   describe('Save new client', () => {
     it('save ', async () => {
-      jest.spyOn(repository, 'create')
+      jest.spyOn(repository, 'create');
       jest.spyOn(repository, 'save').mockResolvedValueOnce(clientDtoSaved);
       const result = await clientsRepository.saveClient(clientDto).toPromise();
       expect(repository.create).toHaveBeenCalledTimes(1);
@@ -64,11 +63,11 @@ describe('Clients Repository', () => {
     });
   });
 
-  describe('get', () => {
+  describe('findOne', () => {
     it('return one result', async () => {
       jest.spyOn(repository, 'findOne').mockResolvedValue(clientDtoSaved);
       const foundClient = await clientsRepository
-        .get(clientDtoSaved.id)
+        .findOne(clientDtoSaved.id)
         .toPromise();
       expect(foundClient).toEqual(clientDtoSaved);
       expect(repository.findOne).lastCalledWith({
@@ -78,14 +77,55 @@ describe('Clients Repository', () => {
       expect(repository.findOne).toBeCalledTimes(1);
     });
 
-    it('return a null result', async () => {
-      jest.spyOn(repository, 'findOne').mockResolvedValue(null);
+    it('return one result without relation', async () => {
+      jest.spyOn(repository, 'findOne').mockResolvedValue(clientDtoSaved);
+      const foundClient = await clientsRepository
+        .findOne(clientDtoSaved.id, false)
+        .toPromise();
+      expect(foundClient).toEqual(clientDtoSaved);
+      expect(repository.findOne).lastCalledWith({
+        where: { id: clientDtoSaved.id },
+      });
+      expect(repository.findOne).toBeCalledTimes(1);
+    });
 
-      try {
-        await clientsRepository.get(idNoExist).toPromise();
-      } catch (e) {
-        expect(e).toBeDefined();
-      }
+    it('return a null result', async () => {
+      jest.spyOn(repository, 'findOne').mockResolvedValue(undefined);
+      const result = await clientsRepository.findOne(idNoExist).toPromise();
+      expect(result).toBeUndefined();
+    });
+
+    it('return one result rif', async () => {
+      jest.spyOn(repository, 'findOne').mockResolvedValue(clientDtoSaved);
+      const foundClient = await clientsRepository
+        .findOne(clientDtoSaved.rif)
+        .toPromise();
+      expect(foundClient).toEqual(clientDtoSaved);
+      expect(repository.findOne).lastCalledWith({
+        where: { rif: clientDtoSaved.rif },
+        relations: ['referrer'],
+      });
+      expect(repository.findOne).toBeCalledTimes(1);
+    });
+
+    it('return one result without relation', async () => {
+      jest.spyOn(repository, 'findOne').mockResolvedValue(clientDtoSaved);
+      const foundClient = await clientsRepository
+        .findOne(clientDtoSaved.rif, false)
+        .toPromise();
+      expect(foundClient).toEqual(clientDtoSaved);
+      expect(repository.findOne).lastCalledWith({
+        where: { rif: clientDtoSaved.rif },
+      });
+      expect(repository.findOne).toBeCalledTimes(1);
+    });
+
+    it('return a null result', async () => {
+      jest.spyOn(repository, 'findOne').mockResolvedValue(undefined);
+      const result = await clientsRepository
+        .findOne('J-123456789-0')
+        .toPromise();
+      expect(result).toBeUndefined();
     });
   });
 
@@ -126,58 +166,10 @@ describe('Clients Repository', () => {
       const clientUp: ClientUpdateDto = {
         name: 'client updated',
       };
-      // jest.spyOn(repository, 'findOne').mockResolvedValue(clientDtoSaved);
       jest.spyOn(repository, 'update').mockResolvedValue(updateRes);
       await clientsRepository.update(clientDtoSaved.id, clientUp).toPromise();
-      // expect(repository.findOne).lastCalledWith({
-      //   relations: ['referrer'],
-      //   where: { id: clientDtoSaved.id },
-      // });
-      // expect(repository.findOne).toBeCalledTimes(2);
       expect(repository.update).lastCalledWith(clientDtoSaved.id, clientUp);
       expect(repository.update).toBeCalledTimes(1);
     });
-
-    // it('return a null result', async () => {
-    //   jest.spyOn(repository, 'findOne').mockResolvedValue(undefined);
-    //   try {
-    //     await clientsRepository.update(100, clientDto).toPromise();
-    //   } catch (e) {
-    //     expect(e).toBeDefined();
-    //   }
-    // });
   });
-
-  // describe('Delete', () => {
-  //   it('Delete with id no found', async () => {
-  //     const find = jest
-  //       .spyOn(repository, 'findOne')
-  //       .mockResolvedValue(undefined);
-  //     const saved = jest.spyOn(repository, 'save').mockResolvedValue(undefined);
-  //     let foundClient;
-  //     clientsRepository.delete(1).subscribe({
-  //       next: x => {
-  //         foundClient = x;
-  //       },
-  //     });
-  //     // const foundClient = await clientsRepository.delete(1).toPromise();
-  //     expect(foundClient).toEqual(undefined);
-  //     expect(find).toHaveBeenCalledTimes(1);
-  //     expect(saved).not.toBeCalled();
-  //   });
-
-  //   it('return result delete', async () => {
-  //     const find = jest
-  //       .spyOn(repository, 'findOne')
-  //       .mockResolvedValue(clientDtoSaved);
-  //     const saved = jest
-  //       .spyOn(repository, 'save')
-  //       .mockResolvedValue(clientDtoSaved);
-  //     // clientsRepository.delete(1).subscribe()
-  //     const foundClient = await clientsRepository.delete(1).toPromise();
-  //     expect(foundClient).toEqual({ message: 'success' });
-  //     expect(find).toHaveBeenCalledTimes(1);
-  //     expect(saved).toHaveBeenCalledTimes(1);
-  //   });
-  // });
 });

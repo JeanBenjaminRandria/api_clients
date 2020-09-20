@@ -1,6 +1,11 @@
-import { BadRequestException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { concat, from, merge, Observable, of, throwError } from 'rxjs';
-import { distinct, filter, map, mergeMap } from 'rxjs/operators';
+import { distinct, filter, map, mergeMap, tap } from 'rxjs/operators';
 import { plainToClass } from 'class-transformer';
 import { ClientsRepository } from './clients.repository';
 import {
@@ -12,7 +17,6 @@ import {
   ClientReadReferrersDto,
   PaginationClientsReadDto,
   PaginationOutReferrersDto,
-  PaginationClientsDto,
   PaginationInDto,
 } from './dtos';
 import { Client } from './model/client.interface';
@@ -20,9 +24,7 @@ import { Status } from '../shared/status.enum';
 
 @Injectable()
 export class ClientsService {
-  constructor(private readonly _repository: ClientsRepository) { }
-
-
+  constructor(private readonly _repository: ClientsRepository) {}
 
   getAll(pagination?: PaginationInDto): Observable<PaginationClientsReadDto> {
     return this._repository.getAll(pagination).pipe(
@@ -39,17 +41,16 @@ export class ClientsService {
     name: string,
     pagination?: PaginationInDto,
   ): Observable<PaginationOutReferrersDto> {
-    return this._repository.getAllByReferrer(name, pagination)
-      .pipe(
-        map(([clients, count]) => {
-          return {
-            count: count,
-            clients: clients.map(cli =>
-              plainToClass(ClientReadReferrersDto, cli),
-            ),
-          };
-        }),
-      );
+    return this._repository.getAllByReferrer(name, pagination).pipe(
+      map(([clients, count]) => {
+        return {
+          count: count,
+          clients: clients.map(cli =>
+            plainToClass(ClientReadReferrersDto, cli),
+          ),
+        };
+      }),
+    );
   }
 
   private validate<T>(
@@ -69,17 +70,11 @@ export class ClientsService {
   }
 
   get(id: number): Observable<ClientReadExDto> {
-
     return this.validate(
       this._repository.findOne(id),
       undefined,
       new NotFoundException(`Client has not been found`),
-    )
-      .pipe(map(client => plainToClass(ClientReadExDto, client)));
-
-    // return this._repository
-    //   .get(id)
-    //   .pipe(map(client => plainToClass(ClientReadExDto, client)));
+    ).pipe(map(client => plainToClass(ClientReadExDto, client)));
   }
 
   private ValidateReferrerId(client: ClientDto): Observable<Client> {
@@ -99,7 +94,7 @@ export class ClientsService {
 
   private validateRif(client: ClientDto): Observable<any> {
     return this.validate(
-      from(this._repository.findOneRif(client.rif)),
+      from(this._repository.findOne(client.rif)),
       new BadRequestException('Client already exist'),
       undefined,
     );
@@ -117,12 +112,6 @@ export class ClientsService {
       .pipe(map(client => plainToClass(ClientReadDto, client)));
   }
 
-  // create(clientProspec: ClientDto): Observable<ClientReadDto> {
-  //   return this._repository
-  //     .create(clientProspec)
-  //     .pipe(map(client => plainToClass(ClientReadDto, client)));
-  // }
-
   update(
     id: number,
     clientProspect: ClientUpdateDto,
@@ -137,9 +126,8 @@ export class ClientsService {
   }
 
   delete(id: number): Observable<MessageDto> {
-
-
-    const find = this._repository.findOne(id, false)
+    const find = this._repository
+      .findOne(id, false)
       .pipe(filter(cli => cli !== undefined))
       .pipe(
         map(cli => {
@@ -151,6 +139,5 @@ export class ClientsService {
       .pipe(mergeMap(() => of({ message: 'success' })));
 
     return find;
-
   }
 }

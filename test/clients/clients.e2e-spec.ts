@@ -236,7 +236,6 @@ describe('CientsController (e2e)', () => {
         });
       done();
     });
-  
   });
 
   describe('/clients/:id (PATH)', () => {
@@ -299,7 +298,5 @@ describe('CientsController (e2e)', () => {
 
       done();
     });
-
   });
-
 });
