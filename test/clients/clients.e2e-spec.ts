@@ -106,6 +106,8 @@ describe('CientsController (e2e)', () => {
         .get(`/clients/referrer/${client.name}`)
         .expect(200)
         .expect(({ body }) => {
+          // console.log(body);
+
           const pagination: PaginationOutReferrersDto = body;
           expect(pagination.count).toBeGreaterThan(0);
           const clients: ClientReadReferrersDto[] = pagination.clients;
@@ -121,6 +123,8 @@ describe('CientsController (e2e)', () => {
         .get(`/clients/referrer/${name}`)
         .expect(200)
         .expect(({ body }) => {
+          // console.log(body);
+
           const pagination: PaginationOutReferrersDto = body;
           expect(pagination.count).toBeGreaterThan(0);
           const clients: ClientReadReferrersDto[] = pagination.clients;

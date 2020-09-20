@@ -13,7 +13,7 @@ import {
   referrerDtoSaved,
 } from './data-test';
 import { ClientDto, ClientUpdateDto, PaginationClientsDto } from '../dtos';
-import { Status } from '../status.enum';
+import { Status } from '../../shared/status.enum';
 
 describe('Clients Repository', () => {
   let repository: Repository<Client>;
@@ -32,6 +32,16 @@ describe('Clients Repository', () => {
             findOne: jest.fn(),
             update: jest.fn,
             delete: jest.fn,
+            createQueryBuilder: jest.fn(() => ({
+              innerJoinAndSelect: jest.fn().mockReturnThis(),
+              where: jest.fn().mockReturnThis(),
+              orderBy: jest.fn().mockReturnThis(),
+              offset: jest.fn().mockReturnThis(),
+              limit: jest.fn().mockReturnThis(),
+              getManyAndCount: jest
+                .fn()
+                .mockResolvedValue([[referrerDtoSaved], 1]),
+            })),
           },
         },
       ],
@@ -177,15 +187,13 @@ describe('Clients Repository', () => {
   describe('getAllByReferrerName', () => {
     it('return all referrers result', async () => {
       const name = referrer.name.slice(0, -3);
-      jest
-        .spyOn(repository, 'findAndCount')
-        .mockResolvedValue([[referrerDtoSaved], 1]);
+      jest.spyOn(repository, 'createQueryBuilder');
       const res: PaginationClientsDto = await clientsRepository
         .getAllByReferrer(name)
         .toPromise();
       expect(res.count).toBe(1);
       expect(res.clients).toEqual([referrerDtoSaved]);
-      expect(repository.findAndCount).toBeCalledTimes(1);
+      expect(repository.createQueryBuilder).toBeCalledTimes(1);
     });
   });
 
