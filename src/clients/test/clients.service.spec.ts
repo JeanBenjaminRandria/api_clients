@@ -20,6 +20,7 @@ import {
   ClientReadReferrersDto,
   ClientUpdateDto,
 } from '../dtos';
+import { ErrorMessage } from '../errors.enum';
 
 describe('ClientsService', () => {
   let service: ClientsService;
@@ -105,11 +106,11 @@ describe('ClientsService', () => {
       jest.spyOn(repository, 'findOne').mockReturnValueOnce(of(undefined)); //find rif
       const saveSpy = jest.spyOn(repository, 'saveClient');
       try {
-        const result = await service.create(createClient).toPromise();
+        await service.create(createClient).toPromise();
       } catch (e) {
         expect(repository.findOne).toHaveBeenCalledTimes(2);
         expect(saveSpy).not.toBeCalled();
-        expect(e.message).toEqual('Referrer does not exist');
+        expect(e.message).toEqual(ErrorMessage.REFERRER_NOT_FOUND);
       }
     });
 
@@ -124,11 +125,11 @@ describe('ClientsService', () => {
       jest.spyOn(repository, 'findOne').mockReturnValueOnce(of(clientDtoSaved)); //find rif
       const saveSpy = jest.spyOn(repository, 'saveClient');
       try {
-        const result = await service.create(createClient).toPromise();
+        await service.create(createClient).toPromise();
       } catch (e) {
         expect(repository.findOne).toHaveBeenCalledTimes(2);
         expect(saveSpy).not.toBeCalled();
-        expect(e.message).toEqual('Client already exist');
+        expect(e.message).toEqual(ErrorMessage.CLIENT_ALREADY_EXIST);
       }
     });
   });
@@ -198,7 +199,7 @@ describe('ClientsService', () => {
         await service.update(100, clientDto).toPromise();
       } catch (e) {
         expect(e).toBeDefined();
-        expect(e.message).toEqual('Client has not been found');
+        expect(e.message).toEqual(ErrorMessage.CLIENT_NOT_FOUND);
       }
     });
   });
@@ -208,7 +209,7 @@ describe('ClientsService', () => {
       const find = jest
         .spyOn(repository, 'findOne')
         .mockReturnValue(of(undefined));
-      const saved = jest.spyOn(repository, 'saveClient');
+      jest.spyOn(repository, 'saveClient');
       let foundClient;
       service.delete(1).subscribe({
         next: x => {

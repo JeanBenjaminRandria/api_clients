@@ -15,6 +15,7 @@ import {
   PaginationOutReferrersDto,
 } from '../../src/clients/dtos';
 import { Client } from '../../src/clients/model/client.interface';
+import { ErrorMessage } from '../../src/clients/errors.enum';
 
 describe('CientsController (e2e)', () => {
   let app: INestApplication;
@@ -106,8 +107,6 @@ describe('CientsController (e2e)', () => {
         .get(`/clients/referrer/${client.name}`)
         .expect(200)
         .expect(({ body }) => {
-          // console.log(body);
-
           const pagination: PaginationOutReferrersDto = body;
           expect(pagination.count).toBeGreaterThan(0);
           const clients: ClientReadReferrersDto[] = pagination.clients;
@@ -123,8 +122,6 @@ describe('CientsController (e2e)', () => {
         .get(`/clients/referrer/${name}`)
         .expect(200)
         .expect(({ body }) => {
-          // console.log(body);
-
           const pagination: PaginationOutReferrersDto = body;
           expect(pagination.count).toBeGreaterThan(0);
           const clients: ClientReadReferrersDto[] = pagination.clients;
@@ -140,7 +137,7 @@ describe('CientsController (e2e)', () => {
         .get('/clients/1000')
         .expect(404)
         .expect(({ body }) => {
-          expect(body.message).toEqual('Client has not been found');
+          expect(body.message).toEqual(ErrorMessage.CLIENT_NOT_FOUND);
         });
       done();
     });
@@ -215,7 +212,7 @@ describe('CientsController (e2e)', () => {
         .send(newClient)
         .expect(HttpStatus.BAD_REQUEST)
         .expect(({ body }) => {
-          expect(body.message).toEqual('Client already exist');
+          expect(body.message).toEqual(ErrorMessage.CLIENT_ALREADY_EXIST);
         });
       done();
     });
@@ -232,7 +229,7 @@ describe('CientsController (e2e)', () => {
         .send(newClient)
         .expect(HttpStatus.BAD_REQUEST)
         .expect(({ body }) => {
-          expect(body.message).toEqual('Referrer does not exist');
+          expect(body.message).toEqual(ErrorMessage.REFERRER_NOT_FOUND);
         });
       done();
     });
@@ -249,7 +246,7 @@ describe('CientsController (e2e)', () => {
         .send(clientUp)
         .expect(404)
         .expect(({ body }) => {
-          expect(body.message).toEqual('Client has not been found');
+          expect(body.message).toEqual(ErrorMessage.CLIENT_NOT_FOUND);
         });
       done();
     });

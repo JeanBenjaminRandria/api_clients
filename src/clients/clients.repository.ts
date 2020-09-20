@@ -10,7 +10,7 @@ import {
   PaginationInDto,
   paginationIntDefault,
 } from './dtos';
-import { Status } from '../shared/status.enum';
+import { Status } from '../shared';
 
 @Injectable()
 export class ClientsRepository {

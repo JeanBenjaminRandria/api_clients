@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { concat, from, merge, Observable, of, throwError } from 'rxjs';
-import { distinct, filter, map, mergeMap, tap } from 'rxjs/operators';
+import { distinct, filter, map, mergeMap } from 'rxjs/operators';
 import { plainToClass } from 'class-transformer';
 import { ClientsRepository } from './clients.repository';
 import {
@@ -13,14 +13,14 @@ import {
   ClientUpdateDto,
   ClientReadDto,
   ClientReadExDto,
-  MessageDto,
   ClientReadReferrersDto,
   PaginationClientsReadDto,
   PaginationOutReferrersDto,
   PaginationInDto,
 } from './dtos';
 import { Client } from './model/client.interface';
-import { Status } from '../shared/status.enum';
+import { Status, MessageDto } from '../shared';
+import { ErrorMessage } from './errors.enum';
 
 @Injectable()
 export class ClientsService {
@@ -86,7 +86,7 @@ export class ClientsService {
           this.validate(
             from(this._repository.findOne(id, false)),
             undefined,
-            new BadRequestException('Referrer does not exist'),
+            new BadRequestException(ErrorMessage.REFERRER_NOT_FOUND),
           ),
         ),
       );
@@ -95,7 +95,7 @@ export class ClientsService {
   private validateRif(client: ClientDto): Observable<any> {
     return this.validate(
       from(this._repository.findOne(client.rif)),
-      new BadRequestException('Client already exist'),
+      new BadRequestException(ErrorMessage.CLIENT_ALREADY_EXIST),
       undefined,
     );
   }
@@ -119,7 +119,7 @@ export class ClientsService {
     return this.validate(
       this._repository.findOne(id, false),
       undefined,
-      new NotFoundException('Client has not been found'),
+      new NotFoundException(ErrorMessage.CLIENT_NOT_FOUND),
     )
       .pipe(mergeMap(() => this._repository.update(id, clientProspect)))
       .pipe(mergeMap(() => this.get(id)));

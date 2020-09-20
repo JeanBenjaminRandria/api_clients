@@ -13,7 +13,7 @@ import {
   referrerDtoSaved,
 } from './data-test';
 import { ClientUpdateDto } from '../dtos';
-import { Status } from '../../shared/status.enum';
+import { Status } from '../../shared';
 
 describe('Clients Repository', () => {
   let repository: Repository<Client>;
